@@ -1,0 +1,77 @@
+{
+    "entities": {
+        "users": {
+            "title": "User Profile",
+            "description": "Stores user profile information",
+            "type": "object",
+            "properties": {
+                "uid": {
+                    "type": "string"
+                },
+                "email": {
+                    "type": "string"
+                },
+                "displayName": {
+                    "type": "string"
+                },
+                "photoURL": {
+                    "type": "string"
+                },
+                "healthId": {
+                    "type": "string",
+                    "description": "Unique Health Identification Number"
+                },
+                "createdAt": {
+                    "type": "string",
+                    "format": "date-time"
+                },
+                "lastLogin": {
+                    "type": "string",
+                    "format": "date-time"
+                }
+            },
+            "required": [
+                "uid",
+                "email"
+            ]
+        },
+        "messages": {
+            "title": "Chat Message",
+            "description": "Stores individual chat messages",
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string"
+                },
+                "role": {
+                    "type": "string",
+                    "enum": [
+                        "user",
+                        "model"
+                    ]
+                },
+                "text": {
+                    "type": "string"
+                },
+                "timestamp": {
+                    "type": "number"
+                }
+            },
+            "required": [
+                "role",
+                "text",
+                "timestamp"
+            ]
+        }
+    },
+    "firestore": {
+        "/users/{userId}": {
+            "schema": "users",
+            "description": "User profile documents"
+        },
+        "/users/{userId}/messages/{messageId}": {
+            "schema": "messages",
+            "description": "User chat history"
+        }
+    }
+}

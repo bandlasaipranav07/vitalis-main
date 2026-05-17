@@ -1,0 +1,89 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // ===============================================================
+    // Assumed Data Model
+    // ===============================================================
+    //
+    // Collection: users
+    // Document ID: {userId} (matches Firebase Auth UID)
+    // Fields:
+    //   - uid: string (required) - The user's unique ID
+    //   - email: string (required) - The user's email address
+    //   - displayName: string (optional) - The user's name
+    //   - photoURL: string (optional) - URL to profile picture
+    //   - healthId: string (optional) - Unique Health Identification Number
+    //   - createdAt: timestamp (optional) - When the profile was created
+    //   - lastLogin: timestamp (optional) - When the user last logged in
+    //   - role: string (optional) - 'admin' or 'user'
+    //
+    // ===============================================================
+
+    // Helper Functions
+    function isAuthenticated() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isAuthenticated() && request.auth.uid == userId;
+    }
+
+    function isAdmin() {
+      return isAuthenticated() &&
+        (get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin' ||
+          (request.auth.token.email == "bandlasaipranav@gmail.com" && request.auth.token.email_verified == true));
+    }
+
+    function isValidUser(data) {
+      return data.keys().hasAll(['uid', 'email']) &&
+             data.uid is string &&
+             data.email is string &&
+             data.email.size() < 256 &&
+             (data.healthId is string || !('healthId' in data)) &&
+             (!('role' in data) || data.role in ['admin', 'user']);
+    }
+
+    function isValidMessage(data) {
+      return data.keys().hasAll(['role', 'text', 'timestamp']) &&
+             data.role in ['user', 'model'] &&
+             data.text is string &&
+             data.text.size() < 10000 &&
+             data.timestamp is number;
+    }
+
+    match /users/{userId} {
+      // Users can only read their own profile
+      allow read: if isOwner(userId) || isAdmin();
+      
+      // Users can create their own profile, but cannot set themselves as admin
+      allow create: if isOwner(userId) && 
+                      isValidUser(request.resource.data) &&
+                      request.resource.data.uid == userId &&
+                      request.resource.data.email == request.auth.token.email &&
+                      (!('role' in request.resource.data) || request.resource.data.role == 'user');
+      
+      // Users can update their own profile, but cannot change their role
+      allow update: if isOwner(userId) && 
+                      isValidUser(request.resource.data) &&
+                      (!('role' in request.resource.data) || request.resource.data.role == resource.data.role) ||
+                      isAdmin();
+
+      match /messages/{messageId} {
+        allow read: if isOwner(userId);
+        allow create: if isOwner(userId) && isValidMessage(request.resource.data);
+        allow delete: if isOwner(userId);
+      }
+    }
+  }
+}
+
+// ===============================================================
+// Devil's Advocate Attack Audit
+// ===============================================================
+// 1. Public List Exploit: Fails. No 'list' permission on /users.
+// 2. Unauthorized Read/Write: Fails. 'isOwner' or 'isAdmin' required.
+// 3. The "Update Bypass": Fails. 'isValidUser' called on update.
+// 4. Ownership Hijacking: Fails. 'isOwner(userId)' ensures path matches auth.uid.
+// 5. Privilege Escalation: Fails. 'create' and 'update' prevent setting 'role' to 'admin'.
+// 6. Resource Exhaustion: Partial. Added size check for email.
+// ===============================================================

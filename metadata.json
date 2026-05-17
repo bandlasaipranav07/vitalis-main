@@ -1,0 +1,6 @@
+{
+  "name": "Vitalis",
+  "description": "An empathetic AI health companion for wellness tracking and symptom guidance.",
+  "requestFramePermissions": ["microphone", "geolocation", "camera"],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
