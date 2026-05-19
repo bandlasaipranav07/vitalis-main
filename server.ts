@@ -29,8 +29,8 @@ const ai = new GoogleGenAI({
   }
 });
 
-const DEFAULT_MODEL = "gemini-1.5-flash";
-const TTS_MODEL = "gemini-1.5-flash";
+const DEFAULT_MODEL = "gemini-flash-latest";
+const TTS_MODEL = "gemini-3.1-flash-tts-preview";
 
 // API Routes
 app.post("/api/gemini/chat", async (req, res) => {
