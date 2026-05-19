@@ -28,11 +28,27 @@ const getEmergencyTranslation = (key: string, lang: Language) => {
     // Fits section
     seizures: { en: "Seizures (Fits)", hi: "दौरे (मिर्गी)", te: "మూర్ఛలు (ఫిట్స్)", ta: "வலிப்பு (பிட்ஸ்)", bn: "খিঁচুনি (ফিট)", ml: "ഫിറ്റ്സ് (അപസ്മാരം)", kn: "ಮೂರ್ಛೆ ರೋಗ (ಫಿಟ್ಸ್)", mr: "फेफरे (फिट्स)", gu: "આંચકી (ફિટ્સ)", es: "Convulsiones (Ataques)", fr: "Convulsions (Crises)" },
     doThis: { en: "DO THIS", hi: "यह करें", te: "ఇలా చేయండి", ta: "இதைச் செய்யுங்கள்", bn: "এটি করুন", ml: "ഇത് ചെയ്യുക", kn: "ಇದನ್ನು ಮಾಡಿ", mr: "हे करा", gu: "આ કરો", es: "HAZ ESTO", fr: "FAITES CECI" },
-    neverDoThis: { en: "NEVER DO THIS", hi: "यह कभी न करें", te: "ఇది ఎప్పుడూ చేయకండి", ta: "இதை ஒருபோதும் செய்யாதீர்கள்", bn: "কখনও এটি করবেন মোহর", ml: "ഇതൊരിക്കലും ചെയ്യരുത്", kn: "ಇದನ್ನು ಎಂದಿಗೂ ಮಾಡಬೇಡಿ", mr: "हे कधीही करू नका", gu: "આ ક્યારેય કરશો નહીં", es: "NUNCA HAGAS ESTO", fr: "NE FAITES JAMAIS CELA" },
+    neverDoThis: { en: "NEVER DO THIS", hi: "यह कभी न करें", te: "ఇది ఎప్పుడూ చేయకండి", ta: "இதை ஒருபோதும் செய்யாதீர்கள்", bn: "কখনও এটি করবেন না", ml: "ഇതൊരിക്കലും ചെയ്യരുത്", kn: "ಇದನ್ನು ಎಂದಿಗೂ ಮಾಡಬೇಡಿ", mr: "हे कधीही करू नका", gu: "આ ક્યારેય કરશો નહીં", es: "NUNCA HAGAS ESTO", fr: "NE FAITES JAMAIS CELA" },
     actionSteps: { en: "Action Steps", hi: "कार्रवाई के कदम", te: "చర్య దశలు", ta: "செயல் படிகள்", bn: "কার্যপ্রণালী", ml: "നടപടിക്രമങ്ങൾ", kn: "ಕ್ರಿಯಾ ಹಂತಗಳು", mr: "कृतीचे टप्पे", gu: "ક્રિયાનાં પગલાં", es: "Pasos a seguir", fr: "Étapes d'action" },
     criticalNotToDo: { en: "Critical: What NOT to do", hi: "महत्वपूर्ण: क्या नहीं करना है", te: "క్లిష్టమైనది: ఏమి చేయకూడదు", ta: "முக்கியமானது: என்ன செய்யக்கூடாது", bn: "গুরুত্বপূর্ণ: কী করবেন না", ml: "പ്രധാനപ്പെട്ടത്: എന്ത് ചെയ്യരുത്", kn: "ನಿರ್ಣಾಯಕ: ಏನು ಮಾಡಬಾರದು", mr: "महत्त्वाचे: काय करू नये", gu: "મહત્વપૂર્ણ: શું ન કરવું", es: "Crítico: Lo que NO se debe hacer", fr: "Critique : Ce qu'il ne faut PAS faire" },
     goodSamaritanTitle: { en: "The Good Samaritan Law (India)", hi: "गुड समैरिटन लॉ (भारत)", te: "గుడ్ సమారిటన్ చట్టం (భారతదేశం)", ta: "நல்ல சமாரியன் சட்டம் (இந்தியா)", bn: "গুড সামারিটান আইন (ভারত)", ml: "നല്ല ശമര്യക്കാരൻ നിയമം (ഇന്ത്യ)", kn: "ಗುಡ್ ಸಮರಿಟನ್ ಕಾನೂನು (ಭಾರತ)", mr: "द गुड समरिटन लॉ (भारत)", gu: "ધ ગુડ સમરિટન લૉ (ભારત)", es: "Ley del Buen Samaritano (India)", fr: "Loi du Bon Samaritain (Inde)" },
     goodSamaritanSub: { en: "The Supreme Court of India has established guidelines to protect bystanders who help road accident victims.", hi: "भारत के सर्वोच्च न्यायालय ने सड़क दुर्घटना पीड़ितों की मदद करने वाले दर्शकों की सुरक्षा के लिए दिशानिर्देश स्थापित किए हैं।", te: "రోడ్డు ప్రమాద బాధితులకు సహాయం చేసే వారిని రక్షించడానికి భారత సుప్రీంకోర్టు మార్గదర్శకాలను ఏర్పాటు చేసింది.", ta: "சாலை விபத்தில் பாதிக்கப்பட்டவர்களுக்கு உதவுபவர்களைப் பாதுகாக்க உச்ச நீதிமன்றம் வழிகாட்டுதல்களை அமைத்துள்ளது.", bn: "সড়ক দুর্ঘটনা ক্ষতিগ্রস্থদের সাহায্যকারী পথচারীদের সুরক্ষার জন্য ভারতের সুপ্রিম কোর্ট নির্দেশিকা প্রতিষ্ঠা করেছে।", ml: "റോഡപകടത്തിൽപ്പെട്ടവരെ സഹായിക്കുന്നവർക്കായി ഇന്ത്യയുടെ സുപ്രീം കോടതി മാർഗ്ഗനിർദ്ദേശങ്ങൾ രൂപീകരിച്ചിട്ടുണ്ട്.", kn: "ರಸ್ತೆ ಅಪಘಾತದ ಸಂತ್ರಸ್ತರಿಗೆ ಸಹಾಯ ಮಾಡುವವರನ್ನು ರಕ್ಷಿಸಲು ಭಾರತದ ಸುಪ್ರೀಂ ಕೋರ್ಟ್ ಮಾರ್ಗಸೂಚಿಗಳನ್ನು ಸ್ಥಾಪಿಸಿದೆ.", mr: "रस्ते अपघातग्रस्तांना मदत करणाऱ्यांना संरक्षण देण्यासाठी भारताच्या सर्वोच्च न्यायालयाने मार्गदर्शक तत्त्वे स्थापित केली आहेत.", gu: "રસ્તા અકસ્માત પીડિતોને મદદ કરનારાઓને સુરક્ષિત કરવા માટે ભારતની સર્વોચ્ચ અદાલતે માર્ગદર્શિકા સ્થાપિત કરી છે.", es: "El Tribunal Supremo ha establecido directrices para proteger a quienes ayudan a las víctimas.", fr: "La Cour suprême a établi des directives pour protéger ceux qui aident les victimes." },
+    
+    // Fits Steps
+    fitDo1: { en: "Ease them to the floor gently.", hi: "उन्हें धीरे से फर्श पर लेटा दें।", te: "వారిని సున్నితంగా నేలపై పడుకోబెట్టండి.", ta: "அவர்களை மெதுவாக தரையில் படுக்க வைக்கவும்.", bn: "তাদের আলতো করে মেঝেতে শুইয়ে দিন।" },
+    fitDo2: { en: "Turn them onto their side to help breathing.", hi: "सांस लेने में मदद करने के लिए उन्हें करवट पर लेटा दें।", te: "శ్వాస తీసుకోవడంలో సహాయపడటానికి వారిని పక్కకు తిప్పండి.", ta: "சுவாசிக்க உதவ அவர்களை ஒரு பக்கமாக திருப்பவும்.", bn: "শ্বাস নিতে সাহায্য করার জন্য তাদের একপাশে ঘুরিয়ে দিন।" },
+    fitDo3: { en: "Clear away hard or sharp objects.", hi: "कठोर या नुकीली वस्तुओं को हटा दें।", te: "కఠినమైన లేదా పదునైన వస్తువులను తొలగించండి.", ta: "கடினமான அல்லது கூர்மையான பொருட்களை அகற்றவும்.", bn: "কঠিন বা ধারালো বস্তু সরিয়ে ফেলুন।" },
+    fitDo4: { en: "Put something soft under their head.", hi: "उनके सिर के नीचे कुछ मुलायम रखें।", te: "వారి తల కింద ఏదైనా మృదువైనది ఉంచండి.", ta: "அவர்களின் தலையின் கீழ் மென்மையான ஒன்றை வைக்கவும்.", bn: "তাদের মাথার নিচে নরম কিছু রাখুন।" },
+    
+    fitDont1: { en: "Do NOT hold them down or stop movements.", hi: "उन्हें दबाकर न रखें या उनकी हरकतों को न रोकें।", te: "వారిని పట్టి ఉంచవద్దు లేదా కదలికలను ఆపవద్దు.", ta: "அவர்களை பிடித்து வைக்கவோ அல்லது அசைவுகளை நிறுத்தவோ வேண்டாம்.", bn: "তাদের ধরে রাখবেন না বা নড়াচড়া বন্ধ করবেন না।" },
+    fitDont2: { en: "Do NOT put anything in their mouth.", hi: "उनके मुंह में कुछ न डालें।", te: "వారి నోటిలో ఏమీ పెట్టవద్దు.", ta: "அவர்களின் வாயில் எதையும் வைக்க வேண்டாம்.", bn: "তাদের মুখে কিছু দেবেন না।" },
+    fitDont3: { en: "Do NOT give water until they are fully alert.", hi: "पूरी तरह सतर्क होने तक पानी न दें।", te: "వారు పూర్తిగా అప్రమత్తమయ్యే వరకు నీరు ఇవ్వకండి.", ta: "அவர்கள் முழுமையாக விழிப்படையும் வரை தண்ணீர் கொடுக்க வேண்டாம்.", bn: "তারা সম্পূর্ণ সচেতন না হওয়া পর্যন্ত জল দেবেন না।" },
+
+    // Good Samaritan Laws
+    law1: { en: "You cannot be forced to reveal your identity or contact details.", hi: "आपको अपनी पहचान या संपर्क विवरण प्रकट करने के लिए बाध्य नहीं किया जा सकता है।", te: "మీ గుర్తింపు లేదా సంప్రదింపు వివరాలను వెల్లడించమని మిమ్మల్ని బలవంతం చేయలేరు.", ta: "உங்கள் அடையாளம் அல்லது தொடர்பு விவரங்களை வெளிப்படுத்த உங்களை கட்டாயப்படுத்த முடியாது.", bn: "আপনার পরিচয় বা যোগাযোগের বিবরণ প্রকাশ করতে আপনাকে বাধ্য করা যাবে না।" },
+    law2: { en: "You are not liable for any civil or criminal action for helping.", hi: "मदद करने के लिए आप किसी भी नागरिक या आपराधिक कार्रवाई के लिए उत्तरदायी नहीं हैं।", te: "సహాయం చేసినందుకు మీరు ఎటువంటి సివిల్ లేదా క్రిమినల్ చర్యలకు బాధ్యులు కారు.", ta: "உதவியதற்காக எந்தவொரு சிவில் அல்லது குற்றவியல் நடவடிக்கைகளுக்கும் நீங்கள் பொறுப்பல்ல.", bn: "সাহায্য করার জন্য আপনি কোনো দেওয়ানি বা ফৌজদারি ব্যবস্থার জন্য দায়ী নন।" },
+    law3: { en: "Hospitals cannot demand payment before starting treatment.", hi: "अस्पताल इलाज शुरू करने से पहले भुगतान की मांग नहीं कर सकते।", te: "చికిత్స ప్రారంభించడానికి ముందు ఆసుపత్రులు చెల్లింపును డిమాండ్ చేయలేవు.", ta: "சிகிச்சையைத் தொடங்குவதற்கு முன் மருத்துவமனைகள் பணம் கோர முடியாது.", bn: "হাসপাতাল চিকিৎসা শুরু করার আগে টাকা দাবি করতে পারে না।" },
+    law4: { en: "You can leave the hospital immediately after admitting the victim.", hi: "आप पीड़ित को भर्ती कराने के तुरंत बाद अस्पताल से जा सकते हैं।", te: "బాధితుడిని చేర్చిన వెంటనే మీరు ఆసుపత్రి నుండి వెళ్ళిపోవచ్చు.", ta: "பாதிக்கப்பட்டவரை சேர்த்த உடனேயே நீங்கள் மருத்துவமனையிலிருந்து வெளியேறலாம்.", bn: "ক্ষতিগ্রস্ত ব্যক্তিকে ভর্তি করার পর আপনি অবিলম্বে হাসপাতাল ছাড়তে পারেন।" },
 
     // CPR
     cprTitle: { en: 'Cardiac Arrest (CPR)', hi: 'कार्डियक अरेस्ट (सीपीआर)', te: 'కార్డియాక్ అరెస్ట్ (CPR)', ta: 'மாரடைப்பு (CPR)', bn: 'কার্ডিয়াক অ্যারেস্ট (CPR)' },
@@ -395,10 +411,10 @@ export default function EmergencyGuides({ language = 'en' }: { language?: Langua
                 {getEmergencyTranslation("doThis", language)}
               </h4>
               <ul className="space-y-3 text-sm text-slate-600">
-                <li className="flex gap-3"><span>•</span> <span>Ease them to the floor gently.</span></li>
-                <li className="flex gap-3"><span>•</span> <span>Turn them onto their side to help breathing.</span></li>
-                <li className="flex gap-3"><span>•</span> <span>Clear away hard or sharp objects.</span></li>
-                <li className="flex gap-3"><span>•</span> <span>Put something soft under their head.</span></li>
+                <li className="flex gap-3"><span>•</span> <span>{getEmergencyTranslation("fitDo1", language)}</span></li>
+                <li className="flex gap-3"><span>•</span> <span>{getEmergencyTranslation("fitDo2", language)}</span></li>
+                <li className="flex gap-3"><span>•</span> <span>{getEmergencyTranslation("fitDo3", language)}</span></li>
+                <li className="flex gap-3"><span>•</span> <span>{getEmergencyTranslation("fitDo4", language)}</span></li>
               </ul>
             </div>
 
@@ -408,9 +424,9 @@ export default function EmergencyGuides({ language = 'en' }: { language?: Langua
                 {getEmergencyTranslation("neverDoThis", language)}
               </h4>
               <ul className="space-y-3 text-sm text-slate-600">
-                <li className="flex gap-3"><span>•</span> <span>Do NOT hold them down or stop movements.</span></li>
-                <li className="flex gap-3"><span>•</span> <span>Do NOT put anything in their mouth.</span></li>
-                <li className="flex gap-3"><span>•</span> <span>Do NOT give water until they are fully alert.</span></li>
+                <li className="flex gap-3"><span>•</span> <span>{getEmergencyTranslation("fitDont1", language)}</span></li>
+                <li className="flex gap-3"><span>•</span> <span>{getEmergencyTranslation("fitDont2", language)}</span></li>
+                <li className="flex gap-3"><span>•</span> <span>{getEmergencyTranslation("fitDont3", language)}</span></li>
               </ul>
             </div>
           </div>
@@ -433,10 +449,10 @@ export default function EmergencyGuides({ language = 'en' }: { language?: Langua
             </p>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {[
-                'You cannot be forced to reveal your identity or contact details.',
-                'You are not liable for any civil or criminal action for helping.',
-                'Hospitals cannot demand payment before starting treatment.',
-                'You can leave the hospital immediately after admitting the victim.'
+                getEmergencyTranslation("law1", language),
+                getEmergencyTranslation("law2", language),
+                getEmergencyTranslation("law3", language),
+                getEmergencyTranslation("law4", language)
               ].map((point, i) => (
                 <div key={`samaritan-${i}`} className="flex items-start gap-3 bg-white/10 p-4 rounded-2xl">
                   <div className="w-1.5 h-1.5 rounded-full bg-indigo-400 mt-1.5 shrink-0" />
