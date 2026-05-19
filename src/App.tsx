@@ -260,7 +260,7 @@ function AppContent() {
       case 'assistant':
         return <ChatWindow initialMessage={prefilledMessage} language={selectedLanguage} />;
       case 'symptom-checker':
-        return <SymptomChecker userTier={userTier} onConsultAI={(msg) => handleNavigate('assistant', msg)} onNavigate={handleNavigate} />;
+        return <SymptomChecker userTier={userTier} onConsultAI={(msg) => handleNavigate('assistant', msg)} onNavigate={handleNavigate} language={selectedLanguage} />;
       case 'medication':
         return <MedicationSection userTier={userTier} onConsultAI={(msg) => handleNavigate('assistant', msg)} onNavigate={handleNavigate} />;
       case 'emergency':

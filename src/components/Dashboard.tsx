@@ -24,7 +24,7 @@ import {
 import { View, UserTier, Language } from '../types';
 import { cn } from '../utils';
 import InfiniteCarousel from './InfiniteCarousel';
-import { translations } from '../translations';
+import { getTranslations } from '../translations';
 
 interface DashboardProps {
   user: any;
@@ -34,7 +34,7 @@ interface DashboardProps {
 }
 
 export default function Dashboard({ user, userTier, onNavigate, language }: DashboardProps) {
-  const t = translations[language] || translations.en;
+  const t = getTranslations(language);
   const firstName = user?.uid === 'guest-user' ? t.guestUser : (user?.displayName?.split(' ')[0] || 'User');
 
   const HEALTH_TIPS = [
@@ -79,9 +79,9 @@ export default function Dashboard({ user, userTier, onNavigate, language }: Dash
       >
         <div className="space-y-1">
           <h1 className="text-3xl sm:text-4xl font-display font-bold text-slate-900 tracking-tight">
-            {language === 'hi' ? 'नमस्ते' : language === 'te' ? 'నమస్కారం' : 'Hello'}, <span className="text-brand-600">{firstName}</span> 👋
+            {t.welcome}, <span className="text-brand-600">{firstName}</span> 👋
           </h1>
-          <p className="text-slate-500 text-base sm:text-lg font-medium tracking-tight">Your health journey is looking great today.</p>
+          <p className="text-slate-500 text-base sm:text-lg font-medium tracking-tight">{t.healthJourneyToday}</p>
         </div>
         <div className="flex items-center gap-4">
           {userTier === 'free' && (
@@ -90,7 +90,7 @@ export default function Dashboard({ user, userTier, onNavigate, language }: Dash
               className="hidden md:flex items-center gap-2 px-4 py-2 bg-amber-50 text-amber-700 rounded-xl text-xs font-bold border border-amber-100 hover:bg-amber-100 transition-all"
             >
               <Crown size={14} fill="currentColor" />
-              Upgrade to Premium
+              {t.upgradePremium}
             </button>
           )}
         </div>
@@ -114,11 +114,11 @@ export default function Dashboard({ user, userTier, onNavigate, language }: Dash
               <div className="w-10 h-10 sm:w-12 sm:h-12 bg-brand-50 rounded-2xl flex items-center justify-center text-brand-600 shadow-inner shrink-0">
                 <Activity size={20} className="sm:w-6 sm:h-6" />
               </div>
-              <h3 className="font-display font-bold text-xl sm:text-2xl text-slate-800 tracking-tight">Health Assistant</h3>
+              <h3 className="font-display font-bold text-xl sm:text-2xl text-slate-800 tracking-tight">{t.healthAssistant}</h3>
             </div>
 
             <p className="text-slate-600 text-base sm:text-lg leading-relaxed max-w-3xl font-medium">
-              Welcome to your personal health companion. Use the tools below to check symptoms, manage medications, or consult our AI assistant for wellness advice. 
+              {t.healthAssistantDesc}
             </p>
           </div>
 
@@ -128,7 +128,7 @@ export default function Dashboard({ user, userTier, onNavigate, language }: Dash
                 <Sparkles size={16} />
               </div>
               <div className="min-w-0">
-                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">Daily Affirmation</p>
+                <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest leading-none mb-1">{t.dailyAffirmation}</p>
                 <p className="text-xs sm:text-sm font-bold text-slate-700 italic truncate sm:whitespace-normal">"{dailyAffirmation}"</p>
               </div>
             </div>
@@ -137,7 +137,7 @@ export default function Dashboard({ user, userTier, onNavigate, language }: Dash
               onClick={() => onNavigate('assistant')}
               className="px-6 sm:px-8 py-3.5 sm:py-4 bg-brand-600 text-white rounded-2xl text-sm sm:text-base font-bold flex items-center justify-center gap-3 hover:bg-brand-700 transition-all shadow-lg shadow-brand-500/20 active:scale-95 whitespace-nowrap"
             >
-              Start Consultation <ChevronRight size={18} />
+              {t.startConsultation} <ChevronRight size={18} />
             </button>
           </div>
         </motion.div>
@@ -154,45 +154,45 @@ export default function Dashboard({ user, userTier, onNavigate, language }: Dash
               <div className="w-10 h-10 bg-brand-50 rounded-xl flex items-center justify-center text-brand-600">
                 <Zap size={20} />
               </div>
-              <h3 className="font-display font-bold text-lg sm:text-xl text-slate-800 tracking-tight">Quick Tools</h3>
+              <h3 className="font-display font-bold text-lg sm:text-xl text-slate-800 tracking-tight">{t.quickTools}</h3>
             </div>
-            <span className="hidden xs:inline text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest">Available Tools</span>
+            <span className="hidden xs:inline text-[9px] sm:text-[10px] font-bold text-slate-400 uppercase tracking-widest">{t.availableTools}</span>
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-5 gap-3 sm:gap-4">
             <ToolButton 
               id="tool-symptom-checker"
               icon={<ShieldCheck className="text-brand-600" />}
-              title="Symptom Checker"
+              title={t.symptomChecker}
               description="AI Analysis"
               onClick={() => onNavigate('symptom-checker')}
             />
             <ToolButton 
               id="tool-medication"
               icon={<Clock className="text-indigo-600" />}
-              title="Medication"
+              title={t.medication}
               description="Track Prescriptions"
               onClick={() => onNavigate('medication')}
             />
             <ToolButton 
               id="tool-emergency"
               icon={<Heart className="text-rose-600" />}
-              title="Emergency"
+              title={t.sos}
               description="First Aid SOS"
               onClick={() => onNavigate('emergency')}
             />
             <ToolButton 
               id="tool-wellness"
               icon={<Activity className="text-emerald-600" />}
-              title="Wellness"
+              title={t.wellness}
               description="Health Pillars"
               onClick={() => onNavigate('general-health')}
             />
             <ToolButton 
               id="tool-family"
               icon={<Users className={cn(userTier === 'premium' ? "text-indigo-600" : "text-slate-300")} />}
-              title="Family Profiles"
-              description={userTier === 'premium' ? "Manage Family" : "Premium Only"}
+              title={t.familyProfiles}
+              description={userTier === 'premium' ? t.manageFamily : t.premiumOnly}
               onClick={() => userTier === 'premium' ? {} : onNavigate('premium-upgrade')}
               isLocked={userTier === 'free'}
             />
@@ -211,7 +211,7 @@ export default function Dashboard({ user, userTier, onNavigate, language }: Dash
           <div className="w-8 h-8 rounded-lg bg-brand-50 flex items-center justify-center text-brand-600">
             <Lightbulb size={16} />
           </div>
-          <h3 className="font-display font-bold text-base sm:text-lg text-slate-800 tracking-tight">Wellness Pulse</h3>
+          <h3 className="font-display font-bold text-base sm:text-lg text-slate-800 tracking-tight">{t.wellnessPulse}</h3>
         </div>
         <InfiniteCarousel 
           speed={35}

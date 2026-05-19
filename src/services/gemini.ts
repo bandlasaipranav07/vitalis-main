@@ -1,4 +1,5 @@
 import { Message, Language, SUPPORTED_LANGUAGES } from "../types";
+import { LocalClinicalEngine } from "../../api/_lib/local-clinical-engine";
 
 const SYSTEM_INSTRUCTION = `You are an AI-powered healthcare assistant designed strictly for medical, wellness, symptom-analysis, healthcare education, nutrition, fitness, and mental wellness support only.
 
@@ -136,7 +137,22 @@ export class GeminiService {
       if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
       return await this.processStream(response, onChunk);
     } catch (error: any) {
-      this.handleError("Chat Stream", error);
+      console.warn("Express backend API unavailable. Falling back to local client-side clinical engine.", error);
+      try {
+        const textMsgs = messages.map(m => m.text || "");
+        const fallbackText = await LocalClinicalEngine.generateChatResponse(textMsgs, language);
+        
+        // Simulate premium dynamic word-by-word streaming
+        const words = fallbackText.split(" ");
+        for (let i = 0; i < words.length; i++) {
+          const word = words[i] + (i === words.length - 1 ? "" : " ");
+          onChunk(word);
+          await new Promise(r => setTimeout(r, 15));
+        }
+        return fallbackText;
+      } catch (fallbackErr) {
+        this.handleError("Chat Stream", error);
+      }
     }
   }
 
@@ -185,15 +201,31 @@ export class GeminiService {
       if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
       return await this.processStream(response, onChunk);
     } catch (error: any) {
-      this.handleError("Audio Chat Stream", error);
+      console.warn("Express backend API unavailable. Falling back to local client-side clinical engine.", error);
+      try {
+        const lastUserText = messages[messages.length - 1]?.text || "Audio consultation query";
+        const fallbackText = `[TRANSCRIPTION]: ${lastUserText}\n\n` + await LocalClinicalEngine.generateChatResponse([lastUserText], language);
+        
+        // Simulate premium dynamic word-by-word streaming
+        const words = fallbackText.split(" ");
+        for (let i = 0; i < words.length; i++) {
+          const word = words[i] + (i === words.length - 1 ? "" : " ");
+          onChunk(word);
+          await new Promise(r => setTimeout(r, 15));
+        }
+        return fallbackText;
+      } catch (fallbackErr) {
+        this.handleError("Audio Chat Stream", error);
+      }
     }
   }
 
   /**
    * Structured symptom analysis
    */
-  async analyzeSymptoms(symptoms: string[], severity: string, duration: string) {
+  async analyzeSymptoms(symptoms: string[], severity: string, duration: string, language: Language = 'en') {
     try {
+      const langName = SUPPORTED_LANGUAGES.find(l => l.code === language)?.name || 'English';
       const prompt = `You are an advanced AI symptom analysis assistant.
 
 Your task is to analyze user symptoms safely and accurately using WHO and NHS medical guidance.
@@ -202,6 +234,8 @@ Collect and analyze:
 * Symptoms: ${symptoms.join(", ")}
 * Severity: ${severity}
 * Duration: ${duration}
+
+CRITICAL: All textual values in the output JSON schema MUST be written in the ${langName} language.
 
 Behavior Rules:
 * Provide structured and precise responses when data is clear.
@@ -234,7 +268,7 @@ Fallback Rule:
 If uncertain, say:
 “I do not have enough reliable information to answer this safely. Please consult a healthcare professional.”`;
 
-      const systemInstruction = SYSTEM_INSTRUCTION + "\n\nOutput strictly JSON for the structured report.";
+      const systemInstruction = SYSTEM_INSTRUCTION + `\n\nOutput strictly JSON for the structured report. All text fields MUST be in ${langName}.`;
       
       const responseSchema = {
         type: "OBJECT",
@@ -253,14 +287,14 @@ If uncertain, say:
       const response = await fetch("/api/gemini/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, systemInstruction, responseSchema })
+        body: JSON.stringify({ prompt, systemInstruction, responseSchema, language })
       });
 
       if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
       return await response.json();
     } catch (error) {
       console.error("Analysis Error:", error);
-      return this.getFallbackAnalysis();
+      return this.getFallbackAnalysis(language, symptoms, severity, duration);
     }
   }
 
@@ -389,7 +423,13 @@ If the uploaded report is blurry, corrupted, incomplete, or unreadable, respond 
       return await response.json();
     } catch (error) {
       console.error("Summary Generation Error:", error);
-      return null;
+      try {
+        const chatTexts = messages.map(m => `${m.role.toUpperCase()}: ${m.text}`);
+        return LocalClinicalEngine.generateClinicalSummary(chatTexts.join("\n"));
+      } catch (err) {
+        console.warn("Client fallback clinical summary scribe failed:", err);
+        return null;
+      }
     }
   }
 
@@ -441,7 +481,12 @@ Determine if it is BANNED, RESTRICTED, or COMMON. provide the specific reason if
       return await response.json();
     } catch (error) {
       console.error("Medication Safety Check Error:", error);
-      throw error;
+      try {
+        return LocalClinicalEngine.generateMedicationSafety(medicationName);
+      } catch (err) {
+        console.warn("Client fallback medication safety check failed:", err);
+        throw error;
+      }
     }
   }
 
@@ -472,7 +517,81 @@ Determine if it is BANNED, RESTRICTED, or COMMON. provide the specific reason if
     throw error;
   }
 
-  private getFallbackAnalysis() {
+  private getFallbackAnalysis(
+    language: Language = 'en',
+    symptoms: string[] = [],
+    severity: string = 'Moderate',
+    duration: string = '1-3 days'
+  ) {
+    try {
+      const fallbackReport = LocalClinicalEngine.generateSymptomAnalysis(symptoms, severity, duration, language);
+      if (fallbackReport) return fallbackReport;
+    } catch (e) {
+      console.warn("Local clinical engine fallback failed. Using hardcoded maps.", e);
+    }
+
+    const isHindi = language === 'hi';
+    const isTelugu = language === 'te';
+    const isTamil = language === 'ta';
+    const isMalayalam = language === 'ml';
+    const isKannada = language === 'kn';
+
+    if (isHindi) {
+      return {
+        healthSummary: "परामर्श की सिफारिश की जाती है",
+        possibleCauses: ["क्षमा करें, मुझे इस हिस्से में जानकारी नहीं है। कृपया डॉक्टर से सलाह लेने का प्रयास करें।"],
+        riskLevel: "Moderate",
+        recommendations: ["सटीक निदान के लिए कृपया किसी स्वास्थ्य पेशेवर से परामर्श लें।"],
+        warningSigns: [],
+        suggestedSpecialist: "सामान्य चिकित्सक",
+        disclaimer: "यह एक फ़ॉलबैक प्रतिक्रिया है। कृपया डॉक्टर से परामर्श लें।"
+      };
+    }
+    if (isTelugu) {
+      return {
+        healthSummary: "సంప్రదింపులు సిఫార్సు చేయబడింది",
+        possibleCauses: ["క్షమించండి, నాకు ఈ విభాగంలో తగినంత పరిజ్ఞానం లేదు. దయచేసి వైద్యుడిని సంప్రదించడానికి ప్రయత్నించండి."],
+        riskLevel: "Moderate",
+        recommendations: ["ఖచ్చితమైన నిర్ధారణ కోసం దయచేసి ఆరోగ్య నిపుణుడిని సంప్రదించండి."],
+        warningSigns: [],
+        suggestedSpecialist: "జనరల్ ఫిజీషియన్",
+        disclaimer: "ఇది ప్రత్యామ్నాయ సమాధానం. దయచేసి వైద్యుడిని సంప్రదించండి."
+      };
+    }
+    if (isTamil) {
+      return {
+        healthSummary: "ஆலோசனை பரிந்துரைக்கப்படுகிறது",
+        possibleCauses: ["மன்னிக்கவும், இந்த பகுதியில் எனக்கு போதுமான அறிவு இல்லை. தயவுசெய்து மருத்துவரை அணுகவும்."],
+        riskLevel: "Moderate",
+        recommendations: ["துல்லியமான நோயறிதலுக்கு ஒரு தகுதி வாய்ந்த மருத்துவரை அணுகவும்."],
+        warningSigns: [],
+        suggestedSpecialist: "பொது மருத்துவர்",
+        disclaimer: "இது ஒரு மாற்று பதில். தயவுசெய்து மருத்துவரை அணுகவும்."
+      };
+    }
+    if (isMalayalam) {
+      return {
+        healthSummary: "ആലോചന നിർദ്ദേശിക്കുന്നു",
+        possibleCauses: ["ക്ഷമിക്കുക, എനിക്ക് ഈ ഭാഗത്ത് മതിയായ അറിവില്ല. ദയവായി ഒരു ഡോക്ടറെ സമീപിക്കുക."],
+        riskLevel: "Moderate",
+        recommendations: ["കൃത്യമായ രോഗനിർണ്ണയത്തിന് ദയവായി ഒരു ഡോക്ടറെ സമീപിക്കുക."],
+        warningSigns: [],
+        suggestedSpecialist: "ജനറൽ ഫിസിഷ്യൻ",
+        disclaimer: "ഇതൊരു ബദൽ പ്രതികരണമാണ്. ദയവായി ഒരു ഡോക്ടറെ സമീപിക്കുക."
+      };
+    }
+    if (isKannada) {
+      return {
+        healthSummary: "ಸಮಾಲೋಚನೆ ಶಿಫಾರಸು ಮಾಡಲಾಗಿದೆ",
+        possibleCauses: ["ಕ್ಷಮಿಸಿ, ನನಗೆ ಈ ಭಾಗದಲ್ಲಿ ಸಾಕಷ್ಟು ಜ್ಞಾನವಿಲ್ಲ. ದಯವಿಟ್ಟು ವೈದ್ಯರನ್ನು ಸಂಪರ್ಕಿಸಲು ಪ್ರಯತ್ನಿಸಿ."],
+        riskLevel: "Moderate",
+        recommendations: ["ನಿಖರವಾದ ರೋಗನಿರ್ಣಯಕ್ಕಾಗಿ ದಯವಿಟ್ಟು ಆರೋಗ್ಯ ವೃತ್ತಿಪರರನ್ನು ಸಂಪರ್ಕಿಸಿ."],
+        warningSigns: [],
+        suggestedSpecialist: "ಸಾಮಾನ್ಯ ವೈದ್ಯರು",
+        disclaimer: "ಇದು ಪರ್ಯಾಯ ಪ್ರತಿಕ್ರಿಯೆಯಾಗಿದೆ. ದಯವಿಟ್ಟು ವೈದ್ಯರನ್ನು ಸಂಪರ್ಕಿಸಿ."
+      };
+    }
+
     return {
       healthSummary: "Consultation Recommended",
       possibleCauses: ["Sorry, I am not knowledgeable in this part. Please try to consult a doctor."],

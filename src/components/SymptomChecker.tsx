@@ -3,7 +3,8 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Stethoscope, Search, ChevronRight, AlertCircle, AlertTriangle, CheckCircle2, Plus, X, Activity, Thermometer, Clock, Loader2, Info, User, RotateCcw, FileText, Crown } from 'lucide-react';
 import { cn } from '../utils';
 import { gemini } from '../services/gemini';
-import { UserTier } from '../types';
+import { UserTier, Language } from '../types';
+import { getTranslations } from '../translations';
 import { useToast } from '../contexts/ToastContext';
 
 const SYMPTOM_GROUPS = {
@@ -23,6 +24,7 @@ interface SymptomCheckerProps {
   userTier: UserTier;
   onConsultAI?: (message: string) => void;
   onNavigate?: (view: any) => void;
+  language: Language;
 }
 
 interface AnalysisResult {
@@ -39,7 +41,113 @@ interface AnalysisResult {
   guidance?: string;
 }
 
-export default function SymptomChecker({ userTier, onConsultAI, onNavigate }: SymptomCheckerProps) {
+const getStep3Text = (key: string, lang: Language) => {
+  const mapping: Record<string, Partial<Record<Language, string>>> = {
+    readyToShowDoctor: {
+      en: "Ready to show your doctor",
+      hi: "अपने डॉक्टर को दिखाने के लिए तैयार",
+      te: "మీ వైద్యుడికి చూపించడానికి సిద్ధంగా ఉంది",
+      ta: "உங்கள் மருத்துவரிடம் காட்ட தயாராக உள்ளது",
+      bn: "আপনার ডাক্তারকে দেখানোর জন্য প্রস্তুত",
+      ml: "നിങ്ങളുടെ ഡോക്ടറെ കാണിക്കാൻ തയ്യാറാണ്",
+      kn: "ನಿಮ್ಮ ವೈದ್ಯರಿಗೆ ತೋರಿಸಲು ಸಿದ್ಧವಾಗಿದೆ",
+      mr: "Ready to show your doctor",
+      gu: "Ready to show your doctor"
+    },
+    presentation: {
+      en: "Presentation",
+      hi: "प्रस्तुति",
+      te: "ప్రదర్శన",
+      ta: "விளக்கம்",
+      bn: "উপস্থাপনা",
+      ml: "അവതരണം",
+      kn: "ಪ್ರಸ್ತುತಿ",
+      mr: "Presentation",
+      gu: "Presentation"
+    },
+    triageCategory: {
+      en: "Triage Category",
+      hi: "वर्गीकरण श्रेणी",
+      te: "ట్రయాజ్ వర్గం",
+      ta: "வகைப்பாடு பிரிவு",
+      bn: "ট্রয়াজ বিভাগ",
+      ml: "ട്രിയാജ് വിഭാഗം",
+      kn: "ಟ್ರಯಾಜ್ ವರ್ಗ",
+      mr: "Triage Category",
+      gu: "Triage Category"
+    },
+    reportedSymptoms: {
+      en: "Reported Symptoms",
+      hi: "सूचित लक्षण",
+      te: "నివేదించబడిన లక్షణాలు",
+      ta: "தெரிவிக்கப்பட்ட அறிகுறிகள்",
+      bn: "প্রতিবেদিত উপসর্গ",
+      ml: "റിപ്പോർട്ട് ചെയ്ത ലക്ഷണങ്ങൾ",
+      kn: "ವರದಿ ಮಾಡಲಾದ ರೋಗಲಕ್ಷಣಗಳು",
+      mr: "Reported Symptoms",
+      gu: "Reported Symptoms"
+    },
+    keyConcernsAnalysis: {
+      en: "Key Concerns & Differential Analysis",
+      hi: "मुख्य चिंताएं और अंतर विश्लेषण",
+      te: "కీలక ఆందోళనలు & భేదాత్మక విశ్లేషణ",
+      ta: "முக்கிய கவலைகள் மற்றும் பகுப்பாய்வு",
+      bn: "মূল উদ্বেগ এবং ডিফারেনশিয়াল বিশ্লেষণ",
+      ml: "പ്രധാന ആശങ്കകളും വിശകലനവും",
+      kn: "ಪ್ರಮುಖ ಕಾಳಜಿಗಳು ಮತ್ತು ವಿಶ್ಲೇಷಣೆ",
+      mr: "Key Concerns & Differential Analysis",
+      gu: "Key Concerns & Differential Analysis"
+    },
+    suggestedQuestions: {
+      en: "Suggested Questions for Your Doctor",
+      hi: "आपके डॉक्टर के लिए सुझाए गए प्रश्न",
+      te: "మీ వైద్యుని కోసం సూచించబడిన ప్రశ్నలు",
+      ta: "உங்கள் மருத்துவரிடம் கேட்க பரிந்துரைக்கப்படும் கேள்விகள்",
+      bn: "আপনার ডাক্তারের জন্য প্রস্তাবিত প্রশ্ন",
+      ml: "നിങ്ങളുടെ ഡോക്ടറോട് ചോദിക്കാനുള്ള ചോദ്യങ്ങൾ",
+      kn: "ನಿಮ್ಮ ವೈದ್ಯರಿಗಾಗಿ ಸೂಚಿಸಲಾದ ಪ್ರಶ್ನೆಗಳು",
+      mr: "Suggested Questions for Your Doctor",
+      gu: "Suggested Questions for Your Doctor"
+    },
+    printExportPdf: {
+      en: "Print / Export PDF",
+      hi: "प्रिंट / पीडीएफ निर्यात करें",
+      te: "ప్రింట్ / పిడిఎఫ్ ఎగుమతి",
+      ta: "பிரிண்ட் / பிடிஎஃப் ஏற்றுமதி",
+      bn: "প্রিন্ট / পিডিএফ রপ্তানি",
+      ml: "പ്രിന്റ് / പിഡിഎഫ് കയറ്റുമതി",
+      kn: "ಪ್ರಿಂಟ್ / ಪಿಡಿಎಫ್ ರಫ್ತು",
+      mr: "Print / Export PDF",
+      gu: "Print / Export PDF"
+    },
+    close: {
+      en: "Close",
+      hi: "बंद करें",
+      te: "మూసివేయి",
+      ta: "மூடு",
+      bn: "বন্ধ করুন",
+      ml: "അടയ്ക്കുക",
+      kn: "ಮುಚ್ಚಿ",
+      mr: "Close",
+      gu: "Close"
+    },
+    toolDisclaimer: {
+      en: "Disclaimer: This tool is for informational purposes only. It does not provide medical diagnosis or replace professional advice.",
+      hi: "अस्वीकरण: यह उपकरण केवल सूचनात्मक उद्देश्यों के लिए है। यह चिकित्सा निदान प्रदान नहीं करता है या पेशेवर सलाह को प्रतिस्थापित नहीं करता है।",
+      te: "నిరాకరణ: ఈ సాధనం సమాచార ప్రయోజనాల కోసం మాత్రమే. ఇది వైద్య నిర్ధారణను అందించదు లేదా వృత్తిపరային సలహాను భర్తీ చేయదు.",
+      ta: "பொறுப்புத் துறப்பு: இந்தக் கருவி தகவல் நோக்கங்களுக்காக மட்டுமே. இது மருத்துவ நோயறிதலை வழங்காது அல்லது தொழில்முறை ஆலோசனையை மாற்றாது.",
+      bn: "দাবিত্যাগ: এই সরঞ্জামটি কেবল তথ্যগত উদ্দেশ্যে তৈরি। এটি কোনো চিকিৎসাগত রোগ নির্ণয় প্রদান করে না বা পেশাদার পরামর্শের বিকল্প নয়।",
+      ml: "നിരാകരണം: ഈ ഉപകരണം വിവര ആവശ്യങ്ങൾക്കായി മാത്രമുള്ളതാണ്. ഇത് മെഡിക്കൽ രോഗനിർണ്ണയം നൽകുന്നില്ല അല്ലെങ്കിൽ പ്രൊഫഷണൽ ഉപദേശത്തിന് പകരമാകുന്നില്ല.",
+      kn: "ಹಕ್ಕುತ್ಯಾಗ: ಈ ಉಪಕರಣವು ಮಾಹಿತಿ ಉದ್ದೇಶಗಳಿಗಾಗಿ ಮಾತ್ರ. ಇದು ವೈದ್ಯಕೀಯ ರೋಗನಿರ್ಣಯವನ್ನು ಒದಗಿಸುವುದಿಲ್ಲ ಅಥವಾ ವೃತ್ತಿಪರ ಸಲಹೆಯನ್ನು ಬದಲಿಸುವುದಿಲ್ಲ.",
+      mr: "Disclaimer: This tool is for informational purposes only. It does not provide medical diagnosis or replace professional advice.",
+      gu: "Disclaimer: This tool is for informational purposes only. It does not provide medical diagnosis or replace professional advice."
+    }
+  };
+  return mapping[key]?.[lang] || mapping[key]?.['en'] || key;
+};
+
+export default function SymptomChecker({ userTier, onConsultAI, onNavigate, language }: SymptomCheckerProps) {
+  const t = getTranslations(language);
   const { showError, showSuccess } = useToast();
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
   const [customSymptoms, setCustomSymptoms] = useState<string[]>([]);
@@ -154,7 +262,7 @@ export default function SymptomChecker({ userTier, onConsultAI, onNavigate }: Sy
     setIsAnalyzing(true);
     try {
       const context = `Patient: ${age}, ${gender}.`;
-      const result = await gemini.analyzeSymptoms([...selectedSymptoms, context], severity, duration);
+      const result = await gemini.analyzeSymptoms([...selectedSymptoms, context], severity, duration, language);
       // Defensive mapping in case the LLM returns the old format or misses fields
       const safeResult = {
         healthSummary: result?.healthSummary || result?.title || "Symptom Assessment",
@@ -195,8 +303,10 @@ export default function SymptomChecker({ userTier, onConsultAI, onNavigate }: Sy
             <Stethoscope size={20} className="sm:w-6 sm:h-6" />
           </div>
           <div className="min-w-0 pr-2">
-            <h2 className="font-display font-bold text-base sm:text-2xl text-slate-800 tracking-tight truncate">Symptom Checker</h2>
-            <p className="text-[9px] sm:text-xs text-slate-500 font-bold uppercase tracking-widest mt-0.5 truncate">Step {step} of 3 • AI Analysis</p>
+            <h2 className="font-display font-bold text-base sm:text-2xl text-slate-800 tracking-tight truncate">{t.symptomChecker}</h2>
+            <p className="text-[9px] sm:text-xs text-slate-500 font-bold uppercase tracking-widest mt-0.5 truncate">
+              {language === 'hi' ? `चरण ${step}/3 • एआई विश्लेषण` : language === 'te' ? `దశ ${step}/3 • AI విశ్లేషణ` : language === 'ta' ? `படி ${step}/3 • எஐ பகுப்பாய்வு` : language === 'bn' ? `ধাপ ${step}/3 • এআই বিশ্লেষণ` : language === 'ml' ? `ഘട്ടം ${step}/3 • എഐ വിശകലനം` : language === 'kn' ? `ಹಂತ ${step}/3 • ಎಐ ವಿಶ್ಲೇಷಣೆ` : `Step ${step} of 3 • AI Analysis`}
+            </p>
           </div>
         </div>
         <div className="flex gap-1 sm:gap-2 shrink-0">
@@ -224,13 +334,15 @@ export default function SymptomChecker({ userTier, onConsultAI, onNavigate }: Sy
             >
                 <div className="space-y-6">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-display font-bold text-lg sm:text-xl text-slate-800">What symptoms are you experiencing?</h3>
+                    <h3 className="font-display font-bold text-lg sm:text-xl text-slate-800">
+                      {t.whatSymptoms}
+                    </h3>
                     {selectedSymptoms.length > 0 && (
                       <button 
                         onClick={() => setSelectedSymptoms([])}
                         className="text-[9px] sm:text-[10px] font-bold text-rose-500 uppercase tracking-widest hover:text-rose-600 transition-colors shrink-0"
                       >
-                        Clear All
+                        {t.clearAll}
                       </button>
                     )}
                   </div>
@@ -245,7 +357,7 @@ export default function SymptomChecker({ userTier, onConsultAI, onNavigate }: Sy
                       value={searchTerm}
                       onChange={(e) => setSearchTerm(e.target.value)}
                       onKeyDown={(e) => e.key === 'Enter' && addCustomSymptom()}
-                      placeholder="Search or add symptoms..." 
+                      placeholder={t.searchOrAdd} 
                       className="w-full pl-12 sm:pl-14 pr-14 sm:pr-16 py-4 sm:py-5 bg-white border border-slate-200 rounded-2xl sm:rounded-[1.5rem] focus:outline-none focus:ring-4 focus:ring-brand-500/5 focus:border-brand-500 transition-all text-sm font-medium shadow-sm"
                     />
                     {searchTerm && (
@@ -261,7 +373,9 @@ export default function SymptomChecker({ userTier, onConsultAI, onNavigate }: Sy
                   {/* Search Results or Groups */}
                   {searchTerm ? (
                     <div className="space-y-4">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2">Search Results</label>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2">
+                        {t.searchResults}
+                      </label>
                       <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                         {filteredSymptoms.map((s, idx) => (
                           <button
@@ -279,7 +393,9 @@ export default function SymptomChecker({ userTier, onConsultAI, onNavigate }: Sy
                         ))}
                         {filteredSymptoms.length === 0 && (
                           <div className="col-span-full py-10 text-center bg-slate-50 rounded-3xl border border-dashed border-slate-200">
-                            <p className="text-sm text-slate-400">No matching symptoms found. Press Enter to add "{searchTerm}"</p>
+                            <p className="text-sm text-slate-400">
+                              {t.noMatchingSymptoms.replace('{searchTerm}', searchTerm)}
+                            </p>
                           </div>
                         )}
                       </div>
@@ -316,7 +432,9 @@ export default function SymptomChecker({ userTier, onConsultAI, onNavigate }: Sy
                   {/* Selected Symptoms Tags */}
                   {selectedSymptoms.length > 0 && (
                     <div className="space-y-4">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2">Selected Symptoms</label>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2">
+                        {t.selectedSymptomsLabel}
+                      </label>
                       <div className="flex flex-wrap gap-2 p-5 bg-brand-50/30 rounded-3xl border border-brand-100/50">
                         {selectedSymptoms.map((s, idx) => (
                           <motion.span 
@@ -339,7 +457,9 @@ export default function SymptomChecker({ userTier, onConsultAI, onNavigate }: Sy
                   {/* Recent Checks */}
                   {recentChecks.length > 0 && !searchTerm && (
                     <div className="space-y-4">
-                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2">Recent Assessments</label>
+                      <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest px-2">
+                        {t.recentAssessments}
+                      </label>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         {recentChecks.map((check) => (
                           <div key={check.id} className="p-4 bg-white border border-slate-100 rounded-2xl flex items-center justify-between group hover:border-brand-200 transition-all">
@@ -375,7 +495,7 @@ export default function SymptomChecker({ userTier, onConsultAI, onNavigate }: Sy
                 onClick={() => setStep(2)}
                 className="w-full py-5 bg-brand-600 text-white rounded-[1.5rem] font-bold hover:bg-brand-700 transition-all disabled:opacity-50 flex items-center justify-center gap-3 shadow-xl shadow-brand-500/20 active:scale-95"
               >
-                Continue Analysis
+                {t.continueAnalysis}
                 <ChevronRight size={20} />
               </button>
             </motion.div>
@@ -390,25 +510,35 @@ export default function SymptomChecker({ userTier, onConsultAI, onNavigate }: Sy
               className="space-y-10"
             >
               <div className="space-y-8 sm:space-y-10">
-                <h3 className="font-display font-bold text-lg sm:text-xl text-slate-800">About the patient</h3>
+                <h3 className="font-display font-bold text-lg sm:text-xl text-slate-800">
+                  {t.patientInfo}
+                </h3>
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   <div className="p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-100 bg-slate-50 space-y-3 sm:space-y-4">
                     <div className="flex items-center gap-3 text-brand-600">
                       <User size={18} />
-                      <label className="text-[10px] sm:text-xs font-bold uppercase tracking-widest leading-none">Age Group</label>
+                      <label className="text-[10px] sm:text-xs font-bold uppercase tracking-widest leading-none">
+                        {t.ageGroup}
+                      </label>
                     </div>
                     <div className="grid grid-cols-2 sm:flex sm:flex-col gap-2">
-                      {['Infant (0-2)', 'Child (3-12)', 'Teen (13-17)', 'Adult (18-64)', 'Senior (65+)'].map(a => (
+                      {[
+                        { key: 'Infant (0-2)', label: t.infant },
+                        { key: 'Child (3-12)', label: t.child },
+                        { key: 'Teen (13-17)', label: t.teen },
+                        { key: 'Adult (18-64)', label: t.adult },
+                        { key: 'Senior (65+)', label: t.senior }
+                      ].map(a => (
                         <button
-                          key={a}
-                          onClick={() => setAge(a)}
+                          key={a.key}
+                          onClick={() => setAge(a.key)}
                           className={cn(
                             "p-3 sm:p-4 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-bold text-left transition-all border leading-tight",
-                            age === a ? "bg-white border-brand-500 text-brand-600 shadow-sm" : "bg-transparent border-transparent text-slate-500 hover:bg-white/50"
+                            age === a.key ? "bg-white border-brand-500 text-brand-600 shadow-sm" : "bg-transparent border-transparent text-slate-500 hover:bg-white/50"
                           )}
                         >
-                          {a}
+                          {a.label}
                         </button>
                       ))}
                     </div>
@@ -417,19 +547,26 @@ export default function SymptomChecker({ userTier, onConsultAI, onNavigate }: Sy
                   <div className="p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-100 bg-slate-50 space-y-3 sm:space-y-4">
                     <div className="flex items-center gap-3 text-brand-600">
                       <Activity size={18} />
-                      <label className="text-[10px] sm:text-xs font-bold uppercase tracking-widest leading-none">Gender</label>
+                      <label className="text-[10px] sm:text-xs font-bold uppercase tracking-widest leading-none">
+                        {t.gender}
+                      </label>
                     </div>
                     <div className="grid grid-cols-2 sm:flex sm:flex-col gap-2">
-                      {['Male', 'Female', 'Other', 'Not Specified'].map(g => (
+                      {[
+                        { key: 'Male', label: t.male },
+                        { key: 'Female', label: t.female },
+                        { key: 'Other', label: t.other },
+                        { key: 'Not Specified', label: t.notSpecified }
+                      ].map(g => (
                         <button
-                          key={g}
-                          onClick={() => setGender(g)}
+                          key={g.key}
+                          onClick={() => setGender(g.key)}
                           className={cn(
                             "p-3 sm:p-4 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-bold text-left transition-all border leading-tight",
-                            gender === g ? "bg-white border-brand-500 text-brand-600 shadow-sm" : "bg-transparent border-transparent text-slate-500 hover:bg-white/50"
+                            gender === g.key ? "bg-white border-brand-500 text-brand-600 shadow-sm" : "bg-transparent border-transparent text-slate-500 hover:bg-white/50"
                           )}
                         >
-                          {g}
+                          {g.label}
                         </button>
                       ))}
                     </div>
@@ -438,19 +575,25 @@ export default function SymptomChecker({ userTier, onConsultAI, onNavigate }: Sy
                   <div className="p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-100 bg-slate-50 space-y-3 sm:space-y-4">
                     <div className="flex items-center gap-3 text-brand-600">
                       <Clock size={18} />
-                      <label className="text-[10px] sm:text-xs font-bold uppercase tracking-widest leading-none">Duration</label>
+                      <label className="text-[10px] sm:text-xs font-bold uppercase tracking-widest leading-none">
+                        {t.duration}
+                      </label>
                     </div>
                     <div className="grid grid-cols-2 sm:flex sm:flex-col gap-2">
-                      {['Less than 24h', '1-3 days', '1 week+'].map(d => (
+                      {[
+                        { key: 'Less than 24 hours', label: t.lessThan24h },
+                        { key: '1-3 days', label: t.oneToThreeDays },
+                        { key: '1 week+', label: t.oneWeekPlus }
+                      ].map(d => (
                         <button
-                          key={d}
-                          onClick={() => setDuration(d)}
+                          key={d.key}
+                          onClick={() => setDuration(d.key)}
                           className={cn(
                             "p-3 sm:p-4 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-bold text-left transition-all border leading-tight",
-                            duration === d ? "bg-white border-brand-500 text-brand-600 shadow-sm" : "bg-transparent border-transparent text-slate-500 hover:bg-white/50"
+                            duration === d.key ? "bg-white border-brand-500 text-brand-600 shadow-sm" : "bg-transparent border-transparent text-slate-500 hover:bg-white/50"
                           )}
                         >
-                          {d}
+                          {d.label}
                         </button>
                       ))}
                     </div>
@@ -459,19 +602,25 @@ export default function SymptomChecker({ userTier, onConsultAI, onNavigate }: Sy
                   <div className="p-5 sm:p-6 rounded-2xl sm:rounded-3xl border border-slate-100 bg-slate-50 space-y-3 sm:space-y-4">
                     <div className="flex items-center gap-3 text-brand-600">
                       <Thermometer size={18} />
-                      <label className="text-[10px] sm:text-xs font-bold uppercase tracking-widest leading-none">Severity</label>
+                      <label className="text-[10px] sm:text-xs font-bold uppercase tracking-widest leading-none">
+                        {t.severity}
+                      </label>
                     </div>
                     <div className="grid grid-cols-2 sm:flex sm:flex-col gap-2">
-                      {['Mild', 'Moderate', 'Severe'].map(s => (
+                      {[
+                        { key: 'Mild', label: t.mild },
+                        { key: 'Moderate', label: t.moderate },
+                        { key: 'Severe', label: t.severe }
+                      ].map(s => (
                         <button
-                          key={s}
-                          onClick={() => setSeverity(s)}
+                          key={s.key}
+                          onClick={() => setSeverity(s.key)}
                           className={cn(
                             "p-3 sm:p-4 rounded-xl sm:rounded-2xl text-xs sm:text-sm font-bold text-left transition-all border leading-tight",
-                            severity === s ? "bg-white border-brand-500 text-brand-600 shadow-sm" : "bg-transparent border-transparent text-slate-500 hover:bg-white/50"
+                            severity === s.key ? "bg-white border-brand-500 text-brand-600 shadow-sm" : "bg-transparent border-transparent text-slate-500 hover:bg-white/50"
                           )}
                         >
-                          {s}
+                          {s.label}
                         </button>
                       ))}
                     </div>
@@ -484,13 +633,13 @@ export default function SymptomChecker({ userTier, onConsultAI, onNavigate }: Sy
                   onClick={() => setStep(1)}
                   className="flex-1 py-4 sm:py-5 bg-slate-100 text-slate-600 rounded-xl sm:rounded-[1.5rem] text-sm sm:text-base font-bold hover:bg-slate-200 transition-all active:scale-95"
                 >
-                  Back
+                  {t.back}
                 </button>
                 <button
                   onClick={performAnalysis}
                   className="flex-[2] py-4 sm:py-5 bg-brand-600 text-white rounded-xl sm:rounded-[1.5rem] text-sm sm:text-base font-bold hover:bg-brand-700 transition-all shadow-xl shadow-brand-500/20 active:scale-95"
                 >
-                  View Results
+                  {t.viewResults}
                 </button>
               </div>
             </motion.div>
@@ -512,8 +661,12 @@ export default function SymptomChecker({ userTier, onConsultAI, onNavigate }: Sy
                     </div>
                   </div>
                   <div className="text-center space-y-2">
-                    <h3 className="font-display font-bold text-xl text-slate-800">Advanced Clinical Analysis...</h3>
-                    <p className="text-sm text-slate-500">Our AI Pro model is cross-referencing with global WHO/NHS standards and real-time medical databases to ensure maximum accuracy.</p>
+                    <h3 className="font-display font-bold text-xl text-slate-800">
+                      {t.advancedAnalysis}
+                    </h3>
+                    <p className="text-sm text-slate-500">
+                      {t.advancedAnalysisDesc}
+                    </p>
                   </div>
                 </div>
               ) : analysis && (
@@ -530,7 +683,9 @@ export default function SymptomChecker({ userTier, onConsultAI, onNavigate }: Sy
                     </div>
                     <div>
                       <h3 className="font-display font-bold text-2xl text-slate-800 tracking-tight">{analysis.healthSummary}</h3>
-                      <p className="text-sm text-slate-500 mt-1">AI-driven assessment based on clinical patterns.</p>
+                      <p className="text-sm text-slate-500 mt-1">
+                        {t.aiDrivenAssessment}
+                      </p>
                     </div>
                   </div>
 
@@ -542,7 +697,9 @@ export default function SymptomChecker({ userTier, onConsultAI, onNavigate }: Sy
                       <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:scale-110 transition-transform">
                         <Activity size={60} />
                       </div>
-                      <h4 className={cn("font-display font-bold text-lg", analysis.riskLevel === 'Emergency' || analysis.riskLevel === 'High' ? "text-rose-900" : "text-brand-900")}>Possible Causes</h4>
+                      <h4 className={cn("font-display font-bold text-lg", analysis.riskLevel === 'Emergency' || analysis.riskLevel === 'High' ? "text-rose-900" : "text-brand-900")}>
+                        {t.possibleCausesLabel}
+                      </h4>
                       <ul className={cn("text-sm leading-relaxed list-disc list-inside", analysis.riskLevel === 'Emergency' || analysis.riskLevel === 'High' ? "text-rose-700" : "text-brand-700")}>
                         {analysis.possibleCauses.map((cause, idx) => (
                           <li key={idx}>{cause}</li>
@@ -551,7 +708,9 @@ export default function SymptomChecker({ userTier, onConsultAI, onNavigate }: Sy
                       
                       {analysis.warningSigns && analysis.warningSigns.length > 0 && (
                         <div className="pt-4 space-y-3">
-                          <h5 className={cn("text-xs font-bold uppercase tracking-widest", analysis.riskLevel === 'Emergency' || analysis.riskLevel === 'High' ? "text-rose-600" : "text-brand-600")}>Warning Signs</h5>
+                          <h5 className={cn("text-xs font-bold uppercase tracking-widest", analysis.riskLevel === 'Emergency' || analysis.riskLevel === 'High' ? "text-rose-600" : "text-brand-600")}>
+                            {t.warningSignsLabel}
+                          </h5>
                           <div className="flex flex-wrap gap-2">
                             {analysis.warningSigns.map((sign, i) => (
                               <span key={i} className={cn(
@@ -574,14 +733,18 @@ export default function SymptomChecker({ userTier, onConsultAI, onNavigate }: Sy
                       <div className="absolute top-0 right-0 p-6 opacity-5 group-hover:scale-110 transition-transform">
                         <AlertCircle size={60} />
                       </div>
-                      <h4 className="font-display font-bold text-lg text-slate-800">Recommendations</h4>
+                      <h4 className="font-display font-bold text-lg text-slate-800">
+                        {t.recommendationsLabel}
+                      </h4>
                       <ul className="text-sm text-slate-700 leading-relaxed font-medium list-disc list-inside">
                         {analysis.recommendations.map((rec, idx) => (
                           <li key={idx}>{rec}</li>
                         ))}
                       </ul>
                       <div className="pt-4 space-y-2">
-                         <h5 className="text-xs font-bold uppercase tracking-widest text-slate-500">Suggested Specialist</h5>
+                         <h5 className="text-xs font-bold uppercase tracking-widest text-slate-500">
+                           {t.suggestedSpecialistLabel}
+                         </h5>
                          <p className="text-sm font-semibold text-slate-700">{analysis.suggestedSpecialist}</p>
                       </div>
                     </div>
@@ -593,14 +756,14 @@ export default function SymptomChecker({ userTier, onConsultAI, onNavigate }: Sy
                         onClick={handleConsultAI}
                         className="py-5 bg-brand-600 text-white rounded-[1.5rem] font-bold hover:bg-brand-700 transition-all shadow-xl shadow-brand-500/20 flex items-center justify-center gap-3 active:scale-95 cursor-pointer"
                       >
-                        Consult AI Assistant
+                        {t.consultAIAssistant}
                         <ChevronRight size={20} />
                       </button>
                       <button
                         onClick={() => userTier === 'premium' ? handleGenerateSummary() : onNavigate?.('premium-upgrade')}
                         disabled={isGeneratingSummary}
                         className={cn(
-                          "py-5 rounded-[1.5rem] font-bold transition-all flex items-center justify-center gap-3 active:scale-95 border-2 cursor-pointer",
+                           "py-5 rounded-[1.5rem] font-bold transition-all flex items-center justify-center gap-3 active:scale-95 border-2 cursor-pointer",
                           userTier === 'premium' 
                             ? "bg-white border-brand-100 text-brand-600 hover:bg-brand-50" 
                             : "bg-slate-50 border-slate-100 text-slate-400 hover:bg-slate-100"
@@ -611,7 +774,7 @@ export default function SymptomChecker({ userTier, onConsultAI, onNavigate }: Sy
                         ) : (
                           <FileText size={20} />
                         )}
-                        Clinical Summary
+                        {t.clinicalSummary}
                         {userTier === 'free' && <Crown size={14} className="text-amber-400" fill="currentColor" />}
                       </button>
                     </div>
@@ -619,7 +782,7 @@ export default function SymptomChecker({ userTier, onConsultAI, onNavigate }: Sy
                       onClick={() => {setStep(1); setSelectedSymptoms([]); setAnalysis(null);}}
                       className="w-full py-5 border-2 border-brand-100 text-brand-600 rounded-[1.5rem] font-bold hover:bg-brand-50 transition-all active:scale-95 cursor-pointer"
                     >
-                      Start New Check
+                      {t.startNewCheck}
                     </button>
                   </div>
                 </>
@@ -644,8 +807,12 @@ export default function SymptomChecker({ userTier, onConsultAI, onNavigate }: Sy
                       <FileText size={24} />
                     </div>
                     <div>
-                      <h3 className="text-xl font-display font-bold text-slate-800">Clinical Summary</h3>
-                      <p className="text-xs text-slate-500 font-medium">Ready to show your doctor</p>
+                      <h3 className="text-xl font-display font-bold text-slate-800">
+                        {t.clinicalSummary}
+                      </h3>
+                      <p className="text-xs text-slate-500 font-medium">
+                        {getStep3Text('readyToShowDoctor', language)}
+                      </p>
                     </div>
                   </div>
                   <button
@@ -659,11 +826,15 @@ export default function SymptomChecker({ userTier, onConsultAI, onNavigate }: Sy
                 <div className="p-8 max-h-[60vh] overflow-y-auto space-y-8 no-scrollbar">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100">
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Presentation</p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                        {getStep3Text('presentation', language)}
+                      </p>
                       <p className="text-sm text-slate-700 leading-relaxed">{clinicalSummary.presentation}</p>
                     </div>
                     <div className="p-5 bg-slate-50 rounded-2xl border border-slate-100">
-                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">Triage Category</p>
+                      <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-2">
+                        {getStep3Text('triageCategory', language)}
+                      </p>
                       <div className="inline-block px-3 py-1 bg-brand-600 text-white text-[10px] font-bold rounded-full uppercase tracking-widest">
                         {clinicalSummary.triageCategory}
                       </div>
@@ -671,7 +842,9 @@ export default function SymptomChecker({ userTier, onConsultAI, onNavigate }: Sy
                   </div>
 
                   <div className="space-y-3">
-                    <h4 className="font-display font-bold text-slate-800">Reported Symptoms</h4>
+                    <h4 className="font-display font-bold text-slate-800">
+                      {getStep3Text('reportedSymptoms', language)}
+                    </h4>
                     <div className="flex flex-wrap gap-2">
                       {clinicalSummary.symptoms.map((s: string, i: number) => (
                         <span key={i} className="px-3 py-1.5 bg-brand-50 border border-brand-100 text-brand-700 text-xs font-bold rounded-xl">
@@ -682,7 +855,9 @@ export default function SymptomChecker({ userTier, onConsultAI, onNavigate }: Sy
                   </div>
 
                   <div className="space-y-4">
-                    <h4 className="font-display font-bold text-slate-800">Key Concerns & Differential Analysis</h4>
+                    <h4 className="font-display font-bold text-slate-800">
+                      {getStep3Text('keyConcernsAnalysis', language)}
+                    </h4>
                     <div className="space-y-2">
                       {clinicalSummary.keyConcerns.map((concern: string, i: number) => (
                         <div key={i} className="flex items-start gap-3 p-4 bg-rose-50/50 border border-rose-100 rounded-xl">
@@ -694,7 +869,9 @@ export default function SymptomChecker({ userTier, onConsultAI, onNavigate }: Sy
                   </div>
 
                   <div className="space-y-4">
-                    <h4 className="font-display font-bold text-slate-800">Suggested Questions for Your Doctor</h4>
+                    <h4 className="font-display font-bold text-slate-800">
+                      {getStep3Text('suggestedQuestions', language)}
+                    </h4>
                     <div className="space-y-2">
                       {clinicalSummary.suggestedQuestionsForDoctor.map((q: string, i: number) => (
                         <div key={i} className="flex items-center gap-3 p-4 bg-slate-50 border border-slate-100 rounded-xl">
@@ -711,13 +888,13 @@ export default function SymptomChecker({ userTier, onConsultAI, onNavigate }: Sy
                     onClick={() => window.print()}
                     className="px-6 py-3 bg-brand-600 text-white text-xs font-bold rounded-xl shadow-lg shadow-brand-500/20 uppercase tracking-widest hover:bg-brand-700 transition-all cursor-pointer"
                   >
-                    Print / Export PDF
+                    {getStep3Text('printExportPdf', language)}
                   </button>
                   <button
                     onClick={() => setShowSummary(false)}
                     className="px-6 py-3 border border-slate-200 text-slate-500 text-xs font-bold rounded-xl uppercase tracking-widest hover:bg-slate-100 transition-all cursor-pointer"
                   >
-                    Close
+                    {getStep3Text('close', language)}
                   </button>
                 </div>
               </motion.div>
@@ -731,7 +908,7 @@ export default function SymptomChecker({ userTier, onConsultAI, onNavigate }: Sy
           <AlertCircle size={20} />
         </div>
         <p className="text-[10px] text-slate-400 leading-relaxed uppercase tracking-widest font-bold">
-          {analysis ? analysis.disclaimer : "Disclaimer: This tool is for informational purposes only. It does not provide medical diagnosis or replace professional advice."}
+          {analysis ? analysis.disclaimer : getStep3Text('toolDisclaimer', language)}
         </p>
       </div>
     </div>

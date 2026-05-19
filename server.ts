@@ -5,14 +5,14 @@ import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
 import { GoogleGenAI, Type, Modality } from "@google/genai";
-import { LocalClinicalEngine } from "./local-clinical-engine";
+import { LocalClinicalEngine } from "./api/_lib/local-clinical-engine";
 import {
   upsertUserProfile,
   getUserProfile,
   getMessages,
   addMessage,
   clearMessages,
-} from "./src/lib/adminDb";
+} from "./api/_lib/adminDb";
 
 const app = express();
 const PORT = 3000;
@@ -29,7 +29,7 @@ const ai = new GoogleGenAI({
   }
 });
 
-const DEFAULT_MODEL = "gemini-3-flash-preview";
+const DEFAULT_MODEL = "gemini-2.5-flash";
 const TTS_MODEL = "gemini-3.1-flash-tts-preview";
 
 // API Routes
@@ -127,13 +127,13 @@ app.post("/api/gemini/analyze", async (req, res) => {
         res.json(fallback);
       } else {
         // Assume symptom checker
-        // Extract severity and duration if possible, otherwise use defaults
         const severity = req.body.severity || "Moderate";
         const duration = req.body.duration || "1-3 days";
+        const language = req.body.language || "en";
         // Extract symptoms list
         const symptomsMatch = prompt.match(/symptoms:\s*([^,]+(?:,\s*[^,]+)*)/);
         const symptoms = symptomsMatch ? symptomsMatch[1].split(",").map((s: string) => s.trim()) : ["Fever", "Cough"];
-        const fallback = LocalClinicalEngine.generateSymptomAnalysis(symptoms, severity, duration);
+        const fallback = LocalClinicalEngine.generateSymptomAnalysis(symptoms, severity, duration, language);
         res.json(fallback);
       }
     } catch (fallbackErr: any) {
