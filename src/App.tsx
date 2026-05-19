@@ -262,9 +262,9 @@ function AppContent() {
       case 'symptom-checker':
         return <SymptomChecker userTier={userTier} onConsultAI={(msg) => handleNavigate('assistant', msg)} onNavigate={handleNavigate} language={selectedLanguage} />;
       case 'medication':
-        return <MedicationSection userTier={userTier} onConsultAI={(msg) => handleNavigate('assistant', msg)} onNavigate={handleNavigate} />;
+        return <MedicationSection userTier={userTier} onConsultAI={(msg) => handleNavigate('assistant', msg)} onNavigate={handleNavigate} language={selectedLanguage} />;
       case 'emergency':
-        return <EmergencyGuides />;
+        return <EmergencyGuides language={selectedLanguage} />;
       case 'general-health':
         return <GeneralHealth />;
       case 'legal-resources':
@@ -284,7 +284,7 @@ function AppContent() {
           />
         );
       default:
-        return <ChatWindow initialMessage={prefilledMessage} />;
+        return <ChatWindow initialMessage={prefilledMessage} language={selectedLanguage} />;
     }
   };
 

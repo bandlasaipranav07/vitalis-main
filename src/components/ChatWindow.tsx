@@ -9,6 +9,144 @@ import { useVoiceChat } from '../hooks/useVoiceChat';
 import { useToast } from '../contexts/ToastContext';
 import { Language, SUPPORTED_LANGUAGES, ClinicalSummary, Message } from '../types';
 
+const LOCALIZED_SUGGESTIONS: Record<Language, string[]> = {
+  en: ["I'm feeling unwell", "Check a symptom", "Medication safety", "Wellness tips", "Nearby hospitals"],
+  hi: ["मुझे अच्छा महसूस नहीं हो रहा है", "लक्षण की जांच करें", "दवा सुरक्षा", "कल्याण युक्तियाँ", "आसपास के अस्पताल"],
+  te: ["నాకు ఒంట్లో బాగోలేదు", "లక్షణాన్ని తనిఖీ చేయండి", "మందుల భద్రత", "ఆరోగ్య చిట్కాలు", "దగ్గరలోని ఆసుపత్రులు"],
+  ta: ["எனக்கு உடம்பு சரியில்லை", "அறிகுறியை சரிபார்க்கவும்", "மருந்து பாதுகாப்பு", "ஆரோக்கிய குறிப்புகள்", "அருகிலுள்ள மருத்துவமனைகள்"],
+  bn: ["আমার শরীর ভালো লাগছে না", "একটি লক্ষণ পরীক্ষা করুন", "ওষুধের নিরাপত্তা", "সুস্থতার টিপ্স", "নিকটবর্তী হাসপাতাল"],
+  ml: ["എനിക്ക് സുഖമില്ല", "ലക്ഷണം പരിശോധിക്കുക", "മരുന്ന് സുരക്ഷ", "ആരോഗ്യ നുറുങ്ങുകൾ", "അടുത്തുള്ള ആശുപത്രികൾ"],
+  kn: ["ನನಗೆ ಹುಷಾರಿಲ್ಲ", "ಲಕ್ಷಣವನ್ನು ಪರೀಕ್ಷಿಸಿ", "ಔಷಧಿ ಸುರಕ್ಷತೆ", "ಆರೋಗ್ಯ ಸಲಹೆಗಳು", "ಹತ್ತಿರದ ಆಸ್ಪತ್ರೆಗಳು"],
+  mr: ["मला बरे वाटत नाहीये", "लक्षण तपासा", "औषध सुरक्षितता", "कल्याण टिप्स", "जवळची रुग्णालये"],
+  gu: ["મને સારું નથી લાગતું", "લક્ષણ તપાસો", "દવા સુરક્ષા", "આરોગ્ય ટીપ્સ", "નજીકની હોસ્પિટલો"],
+  es: ["Me siento mal", "Comprobar un síntoma", "Seguridad de medicamentos", "Consejos de bienestar", "Hospitales cercanos"],
+  fr: ["Je ne me sens pas bien", "Vérifier un symptôme", "Sécurité des médicaments", "Conseils de bien-être", "Hôpitaux à proximité"]
+};
+
+const LOCALIZED_WELCOME_CARDS = (lang: Language, icons: any) => {
+  switch (lang) {
+    case 'hi':
+      return [
+        { title: "लक्षण जांचें", desc: "मुझे बताएं कि आप कैसा महसूस कर रहे हैं", icon: icons.ShieldAlert, text: "मैं कुछ लक्षणों की जांच करना चाहूंगा" },
+        { title: "दवा की जानकारी", desc: "सुरक्षा और दुष्प्रभाव", icon: icons.Pill, text: "मुझे दवा सुरक्षा के बारे में बताएं" },
+        { title: "कल्याण युक्तियाँ", desc: "दैनिक स्वास्थ्य सलाह", icon: icons.HeartPulse, text: "मुझे कुछ कल्याण युक्तियाँ दें" },
+        { title: "देखभाल खोजें", desc: "पास के अस्पताल", icon: icons.PhoneCall, text: "मेरे लिए पास के अस्पताल खोजें" }
+      ];
+    case 'te':
+      return [
+        { title: "లక్షణాలు తనిఖీ చేయండి", desc: "మీరు ఎలా ఉన్నారో చెప్పండి", icon: icons.ShieldAlert, text: "నేను కొన్ని లక్షణాలను తనిఖీ చేయాలనుకుంటున్నాను" },
+        { title: "మందుల సమాచారం", desc: "భద్రత & దుష్ప్రభావాలు", icon: icons.Pill, text: "మందుల భద్రత గురించి నాకు చెప్పండి" },
+        { title: "ఆరోగ్య చిట్కాలు", desc: "రోజువారీ ఆరోగ్య సలహా", icon: icons.HeartPulse, text: "నాకు కొన్ని ఆరోగ్య చిట్కాలు ఇవ్వండి" },
+        { title: "సంరక్షణ కనుగొనండి", desc: "దగ్గరలోని ఆసుపత్రులు", icon: icons.PhoneCall, text: "నా కోసం దగ్గరలోని ఆసుపత్రులను కనుగొనండి" }
+      ];
+    case 'ta':
+      return [
+        { title: "அறிகுறிகளைச் சரிபார்க்கவும்", desc: "நீங்கள் எப்படி உணர்கிறீர்கள் என்று சொல்லுங்கள்", icon: icons.ShieldAlert, text: "நான் சில அறிகுறிகளை சரிபார்க்க விரும்புகிறேன்" },
+        { title: "மருந்து தகவல்", desc: "பாதுகாப்பு & பக்கவிளைவுகள்", icon: icons.Pill, text: "மருந்து பாதுகாப்பு பற்றி எனக்கு சொல்லுங்கள்" },
+        { title: "ஆரோக்கிய குறிப்புகள்", desc: "தினசரி சுகாதார ஆலோசனை", icon: icons.HeartPulse, text: "எனக்கு சில ஆரோக்கிய குறிப்புகளை கொடுங்கள்" },
+        { title: "கவனிப்பைக் கண்டறியவும்", desc: "அருகிலுள்ள மருத்துவமனைகள்", icon: icons.PhoneCall, text: "எனக்காக அருகிலுள்ள மருத்துவமனைகளைக் கண்டறியவும்" }
+      ];
+    case 'bn':
+      return [
+        { title: "লক্ষণ পরীক্ষা করুন", desc: "আপনি কেমন অনুভব করছেন বলুন", icon: icons.ShieldAlert, text: "আমি কিছু লক্ষণ পরীক্ষা করতে চাই" },
+        { title: "ওষুধের তথ্য", desc: "নিরাপত্তা এবং পার্শ্বপ্রতিক্রিয়া", icon: icons.Pill, text: "আমাকে ওষুধের নিরাপত্তা সম্পর্কে বলুন" },
+        { title: "সুস্থতার টিপস", desc: "দৈনিক স্বাস্থ্য পরামর্শ", icon: icons.HeartPulse, text: "আমাকে কিছু সুস্থতার টিপস দিন" },
+        { title: "যত্ন খুঁজুন", desc: "নিকটবর্তী হাসপাতাল", icon: icons.PhoneCall, text: "আমার জন্য নিকটবর্তী হাসপাতাল খুঁজুন" }
+      ];
+    case 'ml':
+      return [
+        { title: "ലക്ഷണങ്ങൾ പരിശോധിക്കുക", desc: "നിങ്ങൾക്ക് എങ്ങനെയുണ്ടെന്ന് പറയുക", icon: icons.ShieldAlert, text: "ഞാൻ ചില ലക്ഷണങ്ങൾ പരിശോധിക്കാൻ ആഗ്രഹിക്കുന്നു" },
+        { title: "മരുന്ന് വിവരങ്ങൾ", desc: "സുരക്ഷയും പാർശ്വഫലങ്ങളും", icon: icons.Pill, text: "മരുന്ന് സുരക്ഷയെക്കുറിച്ച് എന്നോട് പറയുക" },
+        { title: "ആരോഗ്യ നുറുങ്ങുകൾ", desc: "ദിവസേനയുള്ള ആരോഗ്യ ഉപദേശം", icon: icons.HeartPulse, text: "എനിക്ക് ചില ആരോഗ്യ നുറുങ്ങുകൾ തരൂ" },
+        { title: "പരിചരണം കണ്ടെത്തുക", desc: "അടുത്തുള്ള ആശുപത്രികൾ", icon: icons.PhoneCall, text: "എനിക്കായി അടുത്തുള്ള ആശുപത്രികൾ കണ്ടെത്തുക" }
+      ];
+    case 'kn':
+      return [
+        { title: "ಲಕ್ಷಣಗಳನ್ನು ಪರೀಕ್ಷಿಸಿ", desc: "ನೀವು ಹೇಗೆ ಭಾವಿಸುತ್ತೀರಿ ತಿಳಿಸಿ", icon: icons.ShieldAlert, text: "ನಾನು ಕೆಲವು ಲಕ್ಷಣಗಳನ್ನು ಪರೀಕ್ಷಿಸಲು ಬಯಸುತ್ತೇನೆ" },
+        { title: "ಔಷಧಿ ಮಾಹಿತಿ", desc: "ಸುರಕ್ಷತೆ ಮತ್ತು ಅಡ್ಡಪರಿಣಾಮಗಳು", icon: icons.Pill, text: "ಔಷಧಿ ಸುರಕ್ಷತೆಯ ಬಗ್ಗೆ ನನಗೆ ತಿಳಿಸಿ" },
+        { title: "ಆರೋಗ್ಯ ಸಲಹೆಗಳು", desc: "ದೈನಂದಿನ ಆರೋಗ್ಯ ಸಲಹೆ", icon: icons.HeartPulse, text: "ನನಗೆ ಕೆಲವು ಆರೋಗ್ಯ ಸಲಹೆಗಳನ್ನು ನೀಡಿ" },
+        { title: "ಆರೈಕೆ ಹುಡುಕಿ", desc: "ಹತ್ತಿರದ ಆಸ್ಪತ್ರೆಗಳು", icon: icons.PhoneCall, text: "ನನಗಾಗಿ ಹತ್ತಿರದ ಆಸ್ಪತ್ರೆಗಳನ್ನು ಹುಡುಕಿ" }
+      ];
+    case 'mr':
+      return [
+        { title: "लक्षणे तपासा", desc: "तुम्हाला कसे वाटत आहे ते सांगा", icon: icons.ShieldAlert, text: "मला काही लक्षणे तपासायची आहेत" },
+        { title: "औषध माहिती", desc: "सुरक्षितता आणि दुष्परिणाम", icon: icons.Pill, text: "मला औषध सुरक्षिततेबद्दल सांगा" },
+        { title: "कल्याण टिप्स", desc: "दैनिक आरोग्य सल्ला", icon: icons.HeartPulse, text: "मला काही कल्याण टिप्स द्या" },
+        { title: "काळजी शोधा", desc: "जवळील रुग्णालये", icon: icons.PhoneCall, text: "माझ्यासाठी जवळील रुग्णालये शोधा" }
+      ];
+    case 'gu':
+      return [
+        { title: "લક્ષણો તપાસો", desc: "તમે કેવું અનુભવો છો તે કહો", icon: icons.ShieldAlert, text: "હું કેટલાક લક્ષણો તપાસવા માંગુ છું" },
+        { title: "દવાની માહિતી", desc: "સુરક્ષા અને આડઅસરો", icon: icons.Pill, text: "મને દવાની સુરક્ષા વિશે જણાવો" },
+        { title: "આરોગ્ય ટીપ્સ", desc: "દૈનિક આરોગ્ય સલાહ", icon: icons.HeartPulse, text: "મને કેટલીક આરોગ્ય ટીપ્સ આપો" },
+        { title: "સંભાળ શોધો", desc: "નજીકની હોસ્પિટલો", icon: icons.PhoneCall, text: "મારા માટે નજીકની હોસ્પિટલો શોધો" }
+      ];
+    case 'es':
+      return [
+        { title: "Verificar síntomas", desc: "Dime cómo te sientes", icon: icons.ShieldAlert, text: "Me gustaría verificar algunos síntomas" },
+        { title: "Info de medicamentos", desc: "Seguridad y efectos secundarios", icon: icons.Pill, text: "Cuéntame sobre la seguridad de los medicamentos" },
+        { title: "Consejos de bienestar", desc: "Consejos de salud diarios", icon: icons.HeartPulse, text: "Dame algunos consejos de bienestar" },
+        { title: "Encontrar atención", desc: "Hospitales cercanos", icon: icons.PhoneCall, text: "Encuentra hospitales cercanos para mí" }
+      ];
+    case 'fr':
+      return [
+        { title: "Vérifier les symptômes", desc: "Dites-moi comment vous vous sentez", icon: icons.ShieldAlert, text: "Je voudrais vérifier certains symptômes" },
+        { title: "Infos médicaments", desc: "Sécurité et effets secondaires", icon: icons.Pill, text: "Parlez-moi de la sécurité des médicaments" },
+        { title: "Conseils bien-être", desc: "Conseils de santé quotidiens", icon: icons.HeartPulse, text: "Donnez-moi des conseils de bien-être" },
+        { title: "Trouver des soins", desc: "Hôpitaux à proximité", icon: icons.PhoneCall, text: "Trouver des hôpitaux à proximité pour moi" }
+      ];
+    default:
+      return [
+        { title: "Check Symptoms", desc: "Tell me how you feel", icon: icons.ShieldAlert, text: "I'd like to check some symptoms" },
+        { title: "Medication Info", desc: "Safety & side effects", icon: icons.Pill, text: "Tell me about medication safety" },
+        { title: "Wellness Tips", desc: "Daily health advice", icon: icons.HeartPulse, text: "Give me some wellness tips" },
+        { title: "Find Care", desc: "Nearby hospitals", icon: icons.PhoneCall, text: "Find nearby hospitals for me" }
+      ];
+  }
+};
+
+const LOCALIZED_PLACEHOLDERS: Record<Language, { ask: string; listening: string }> = {
+  en: { ask: "Ask Vitalis...", listening: "I'm listening..." },
+  hi: { ask: "वाइटलिस से पूछें...", listening: "मैं सुन रहा हूँ..." },
+  te: { ask: "వైటలిస్‌ని అడగండి...", listening: "నేను వింటున్నాను..." },
+  ta: { ask: "வைட்டலிஸிடம் கேளுங்கள்...", listening: "நான் கேட்கிறேன்..." },
+  bn: { ask: "ভাইটালিসকে জিজ্ঞাসা করুন...", listening: "আমি শুনছি..." },
+  ml: { ask: "വൈറ്റലിസിനോട് ചോദിക്കുക...", listening: "ഞാൻ കേൾക്കുന്നുണ്ട്..." },
+  kn: { ask: "ವೈಟಲಿಸ್ ಬಳಿ ಕೇಳಿ...", listening: "ನಾನು ಕೇಳುತ್ತಿದ್ದೇನೆ..." },
+  mr: { ask: "वाइटलिसला विचारा...", listening: "मी ऐकत आहे..." },
+  gu: { ask: "વાઇટલિસને પૂછો...", listening: "હું સાંભળી રહ્યો છું..." },
+  es: { ask: "Pregúntale a Vitalis...", listening: "Estoy escuchando..." },
+  fr: { ask: "Demandez à Vitalis...", listening: "J'écoute..." }
+};
+
+const LOCALIZED_THINKING_LABELS: Record<Language, string> = {
+  en: "Thinking...",
+  hi: "सोच रहा हूँ...",
+  te: "ఆలోచిస్తోంది...",
+  ta: "யோசிக்கிறது...",
+  bn: "ভাবছি...",
+  ml: "ചിന്തിക്കുന്നു...",
+  kn: "ಚಿಂತಿಸುತ್ತಿದೆ...",
+  mr: "विचार करत आहे...",
+  gu: "વિચારી રહ્યું છે...",
+  es: "Pensando...",
+  fr: "Réflexion..."
+};
+
+const LOCALIZED_THINKING_TEXTS: Record<Language, string[]> = {
+  en: ["Consulting medical guides...", "Analyzing your symptoms...", "Checking safety standards...", "Preparing advice..."],
+  hi: ["चिकित्सा गाइडों से परामर्श ले रहे हैं...", "आपके लक्षणों का विश्लेषण कर रहे हैं...", "सुरक्षा मानकों की जांच कर रहे हैं...", "सलाह तैयार कर रहे हैं..."],
+  te: ["వైద్య మార్గదర్శకాలను సంప్రదిస్తోంది...", "మీ లక్షణాలను విશ્లేషిస్తోంది...", "భద్రతా ప్రమాణాలను తనిఖీ చేస్తోంది...", "సలహాలను సిద్ధం చేస్తోంది..."],
+  ta: ["மருத்துவ வழிகாட்டிகளை ஆலோசிக்கிறது...", "உங்கள் அறிகுறிகளை பகுப்பாய்வு செய்கிறது...", "பாதுகாப்பு தரங்களை சரிபார்க்கிறது...", "ஆலோசனையைத் தயாரிப்பது..."],
+  bn: ["চিকিৎসা নির্দেশিকা পরামর্শ করা হচ্ছে...", "আপনার লক্ষণ বিশ্লেষণ করা হচ্ছে...", "নিরাপত্তা মান পরীক্ষা করা হচ্ছে...", "পরামর্শ প্রস্তুত করা হচ্ছে..."],
+  ml: ["മെഡിക്കൽ ഗൈഡുകൾ പരിശോധിക്കുന്നു...", "നിങ്ങളുടെ ലക്ഷണങ്ങൾ വിശകലനം ചെയ്യുന്നു...", "സുരക്ഷാ മാനദണ്ഡങ്ങൾ പരിശോധിക്കുന്നു...", "നിർദ്ദേശങ്ങൾ തയ്യാറാക്കുന്നു..."],
+  kn: ["ವೈದ್ಯಕೀಯ ಮಾರ್ಗದರ್ಶಿಗಳನ್ನು ಸಂಪರ್ಕಿಸಲಾಗುತ್ತಿದೆ...", "ನಿಮ್ಮ ಲಕ್ಷಣಗಳನ್ನು ವಿಶ್ಲೇಷಿಸಲಾಗುತ್ತಿದೆ...", "ಸುರಕ್ಷತಾ ಮಾನದಂಡಗಳನ್ನು ಪರಿಶೀಲಿಸಲಾಗುತ್ತಿದೆ...", "ಸಲಹೆಯನ್ನು ಸಿದ್ಧಪಡಿಸಲಾಗುತ್ತಿದೆ..."],
+  mr: ["वैद्यकीय मार्गदर्शकांचा सल्ला घेत आहे...", "तुमच्या लक्षणांचे विश्लेषण करत आहे...", "सुरक्षा मानके तपासत आहे...", "सल्ला तैयार करत आहे..."],
+  gu: ["તબીબી માર્ગદર્શિકાઓની સલાહ લઈ રહ્યા છીએ...", "તમારા લક્ષણોનું విશ્લેષણ કરી રહ્યા છીએ...", "સુરક્ષા ધોરણો તપાસી રહ્યા છીએ...", "સલાહ તૈયાર કરી રહ્યા છીએ..."],
+  es: ["Consultando guías médicas...", "Analizando sus síntomas...", "Comprobando normas de seguridad...", "Preparando consejos..."],
+  fr: ["Consultation des guides médicaux...", "Analyse de vos symptômes...", "Vérification des normes de sécurité...", "Préparation des conseils..."]
+};
+
 interface ChatWindowProps {
   initialMessage?: string;
   language?: Language;
@@ -29,11 +167,15 @@ export default function ChatWindow({ initialMessage, language = 'en' }: ChatWind
   const [isGeneratingSummary, setIsGeneratingSummary] = useState(false);
   const [streamingMessage, setStreamingMessage] = useState<string | null>(null);
   const [showScrollButton, setShowScrollButton] = useState(false);
-  const [thinkingText, setThinkingText] = useState("Thinking...");
+  const [thinkingText, setThinkingText] = useState(() => LOCALIZED_THINKING_LABELS[language] || "Thinking...");
+
+  useEffect(() => {
+    setThinkingText(LOCALIZED_THINKING_LABELS[language] || "Thinking...");
+  }, [language]);
 
   useEffect(() => {
     if (isLoading) {
-      const texts = ["Consulting medical guides...", "Analyzing your symptoms...", "Checking safety standards...", "Preparing advice..."];
+      const texts = LOCALIZED_THINKING_TEXTS[language] || LOCALIZED_THINKING_TEXTS.en;
       let i = 0;
       const interval = setInterval(() => {
         setThinkingText(texts[i % texts.length]);
@@ -41,7 +183,7 @@ export default function ChatWindow({ initialMessage, language = 'en' }: ChatWind
       }, 2000);
       return () => clearInterval(interval);
     }
-  }, [isLoading]);
+  }, [isLoading, language]);
   
   // Image Upload State
   const [selectedImage, setSelectedImage] = useState<{ base64: string; mimeType: string } | null>(null);
@@ -54,13 +196,7 @@ export default function ChatWindow({ initialMessage, language = 'en' }: ChatWind
   const isRedFlag = /chest pain|difficulty breathing|shortness of breath|numbness|bleeding|unconscious|stroke|heart attack/i.test(input);
 
   // Smart Suggestions (Contextual Quick Replies)
-  const suggestions = [
-    "I'm feeling unwell",
-    "Check a symptom",
-    "Medication safety",
-    "Wellness tips",
-    "Nearby hospitals"
-  ];
+  const suggestions = LOCALIZED_SUGGESTIONS[language] || LOCALIZED_SUGGESTIONS.en;
 
   // Custom Hooks
   const { messages, saveMessage, clearHistory } = useChatHistory();
@@ -362,12 +498,12 @@ export default function ChatWindow({ initialMessage, language = 'en' }: ChatWind
                 animate={{ opacity: 1, y: 0 }}
                 className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-8"
               >
-                {[
-                  { title: "Check Symptoms", desc: "Tell me how you feel", icon: <ShieldAlert className="text-brand-600" />, text: "I'd like to check some symptoms" },
-                  { title: "Medication Info", desc: "Safety & side effects", icon: <Pill className="text-indigo-600" />, text: "Tell me about medication safety" },
-                  { title: "Wellness Tips", desc: "Daily health advice", icon: <HeartPulse className="text-rose-600" />, text: "Give me some wellness tips" },
-                  { title: "Find Care", desc: "Nearby hospitals", icon: <PhoneCall className="text-emerald-600" />, text: "Find nearby hospitals for me" }
-                ].map((item, i) => (
+                {LOCALIZED_WELCOME_CARDS(language, {
+                  ShieldAlert: <ShieldAlert className="text-brand-600" />,
+                  Pill: <Pill className="text-indigo-600" />,
+                  HeartPulse: <HeartPulse className="text-rose-600" />,
+                  PhoneCall: <PhoneCall className="text-emerald-600" />
+                }).map((item, i) => (
                   <button
                     key={i}
                     onClick={() => handleSend(item.text)}
@@ -513,7 +649,7 @@ export default function ChatWindow({ initialMessage, language = 'en' }: ChatWind
               value={input}
               onChange={(e) => setInput(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSend()}
-              placeholder={isListening ? "I'm listening..." : "Ask Vitalis..."}
+              placeholder={isListening ? (LOCALIZED_PLACEHOLDERS[language]?.listening || "I'm listening...") : (LOCALIZED_PLACEHOLDERS[language]?.ask || "Ask Vitalis...")}
               disabled={isLoading}
               className={cn(
                 "w-full pl-6 pr-12 py-4 bg-brand-50/30 border border-brand-100 rounded-2xl focus:outline-none focus:ring-4 focus:ring-brand-500/5 focus:border-brand-500 transition-all text-sm placeholder:text-slate-400",

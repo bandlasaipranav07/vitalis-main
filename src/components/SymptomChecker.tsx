@@ -20,6 +20,87 @@ const SYMPTOM_GROUPS = {
 
 const COMMON_SYMPTOMS = Object.values(SYMPTOM_GROUPS).flat();
 
+const getLocalizedGroup = (group: string, lang: Language) => {
+  const groups: Record<string, Partial<Record<Language, string>>> = {
+    'General': { hi: 'सामान्य', te: 'సాధారణ', ta: 'பொதுவானவை', bn: 'সাধারণ', ml: 'പൊതുവായ', kn: 'ಸಾಮಾನ್ಯ', mr: 'सामान्य', gu: 'સામાન્ય', es: 'General', fr: 'Général' },
+    'Respiratory': { hi: 'श्वसन', te: 'శ్వాసకోశ', ta: 'சுவாச', bn: 'শ্বাসযন্ত্রের', ml: 'ശ്വസന', kn: 'ಉಸಿರಾಟ', mr: 'श्वसन', gu: 'શ્વસન', es: 'Respiratorio', fr: 'Respiratoire' },
+    'Neurological': { hi: 'तंत्रिका संबंधी', te: 'నాడీ సంబంధిత', ta: 'நரம்பியல்', bn: 'স্নায়বিক', ml: 'ന്യൂറോളജിക്കൽ', kn: 'ನರವೈಜ್ಞಾನಿಕ', mr: 'मज्जासंस्था', gu: 'ન્યુરોલોજીકલ', es: 'Neurológico', fr: 'Neurologique' },
+    'Digestive': { hi: 'पाचन', te: 'జీర్ణ', ta: 'செரிமான', bn: 'পাচক', ml: 'ദഹന', kn: 'ಜೀರ್ಣಕಾರಿ', mr: 'पचन', gu: 'પાચન', es: 'Digestivo', fr: 'Digestif' },
+    'Musculoskeletal': { hi: 'मांसपेशियों और हड्डियों का', te: 'కండరాల మరియు ఎముకల', ta: 'தசை மற்றும் எலும்பு', bn: 'পেশীবহুল', ml: 'മസ്കുലോസ്കെലെറ്റൽ', kn: 'ಸ್ನಾಯು ಮತ್ತು ಮೂಳೆ', mr: 'स्नायू आणि हाडे', gu: 'સ્નાયુ અને હાડકાં', es: 'Musculoesquelético', fr: 'Musculosquelettique' },
+    'Skin & Eyes': { hi: 'त्वचा और आंखें', te: 'చర్మం & కళ్ళు', ta: 'தோல் & கண்கள்', bn: 'ত্বক এবং চোখ', ml: 'ചർമ്മവും കണ്ണുകളും', kn: 'ಚರ್ಮ & ಕಣ್ಣುಗಳು', mr: 'त्वचा आणि डोळे', gu: 'ત્વચા અને આંખો', es: 'Piel y Ojos', fr: 'Peau et Yeux' },
+    'Cardiovascular': { hi: 'हृदय संबंधी', te: 'కార్డియోవాస్కులర్', ta: 'இதயவியல்', bn: 'কার্ডিওভাসকুলার', ml: 'ഹൃദയസംബന്ധമായ', kn: 'ಹೃದಯರಕ್ತನಾಳದ', mr: 'हृदय व रक्तवाहिन्यासंबंधी', gu: 'કાર્ડિયોવાસ્ક્યુલર', es: 'Cardiovascular', fr: 'Cardiovasculaire' },
+    'Other': { hi: 'अन्य', te: 'ఇతర', ta: 'மற்றவை', bn: 'অন্যান্য', ml: 'മറ്റ്', kn: 'ಇತರೆ', mr: 'इतर', gu: 'અન્ય', es: 'Otro', fr: 'Autre' }
+  };
+  return groups[group]?.[lang] || group;
+};
+
+const getLocalizedSymptom = (symptom: string, lang: Language) => {
+  const symptoms: Record<string, Partial<Record<Language, string>>> = {
+    'Fever': { hi: 'बुखार', te: 'జ్వరం', ta: 'காய்ச்சல்', bn: 'জ্বর', ml: 'പനി', kn: 'ಜ್ವರ', mr: 'ताप', gu: 'તાવ', es: 'Fiebre', fr: 'Fièvre' },
+    'Chills': { hi: 'ठंड लगना', te: 'చలి', ta: 'குளிர்', bn: 'ঠান্ডা লাগা', ml: 'കുളിര്', kn: 'ಚಳಿ', mr: 'थंडी', gu: 'ઠંડી', es: 'Escalofríos', fr: 'Frissons' },
+    'Fatigue': { hi: 'थकान', te: 'అలసట', ta: 'சோர்வு', bn: 'ক্লান্তি', ml: 'ക്ഷീണം', kn: 'ಆಯಾಸ', mr: 'थकवा', gu: 'થાક', es: 'Fatiga', fr: 'Fatigue' },
+    'Weakness': { hi: 'कमजोरी', te: 'బలహీనత', ta: 'பலவீனம்', bn: 'দুর্বলতা', ml: 'ബലഹീനത', kn: 'ದುರ್ಬಲತೆ', mr: 'अशक्तपणा', gu: 'નબળાઇ', es: 'Debilidad', fr: 'Faiblesse' },
+    'Weight Loss': { hi: 'वजन कम होना', te: 'బరువు తగ్గడం', ta: 'எடை இழப்பு', bn: 'ওজন হ্রাস', ml: 'ഭാരം കുറയുക', kn: 'ತೂಕ ನಷ್ಟ', mr: 'वजन कमी होणे', gu: 'વજન ઘટાડવું', es: 'Pérdida de peso', fr: 'Perte de poids' },
+    'Weight Gain': { hi: 'वजन बढ़ना', te: 'బరువు పెరగడం', ta: 'எடை அதிகரிப்பு', bn: 'ওজন বৃদ্ধি', ml: 'ഭാരം കൂടുക', kn: 'ತೂಕ ಹೆಚ್ಚಾಗುವುದು', mr: 'वजन वाढणे', gu: 'વજન વધવું', es: 'Aumento de peso', fr: 'Prise de poids' },
+    'Night Sweats': { hi: 'रात में पसीना', te: 'రాత్రి చెమటలు', ta: 'இரவில் வியர்த்தல்', bn: 'রাতে ঘাম', ml: 'രാത്രിയിലെ വിയർപ്പ്', kn: 'ರಾತ್ರಿ ಬೆವರು', mr: 'रात्री घाम येणे', gu: 'રાત્રે પરસેવો', es: 'Sudores nocturnos', fr: 'Sueurs nocturnes' },
+    'Body Ache': { hi: 'बदन दर्द', te: 'శరీర నొప్పి', ta: 'உடல் வலி', bn: 'গায়ে ব্যথা', ml: 'ശരീരവേദന', kn: 'ಮೈಕೈ ನೋವು', mr: 'अंगदुखी', gu: 'શરીરમાં દુખાવો', es: 'Dolor corporal', fr: 'Courbatures' },
+    'Cough': { hi: 'खांसी', te: 'దగ్గు', ta: 'இருமல்', bn: 'কাশি', ml: 'ചുമ', kn: 'ಕೆಮ್ಮು', mr: 'खोकला', gu: 'ઉધરસ', es: 'Tos', fr: 'Toux' },
+    'Shortness of Breath': { hi: 'सांस की तकलीफ', te: 'శ్వాస ఆడకపోవడం', ta: 'மூச்சுத் திணறல்', bn: 'শ্বাসকষ্ট', ml: 'ശ്വാസതടസ്സം', kn: 'ಉಸಿರಾಟದ ತೊಂದರೆ', mr: 'श्वास लागणे', gu: 'શ્વાસ લેવામાં તકલીફ', es: 'Falta de aire', fr: 'Essoufflement' },
+    'Sore Throat': { hi: 'गले में खराश', te: 'గొంతు నొప్పి', ta: 'தொண்டை வலி', bn: 'গলা ব্যথা', ml: 'തൊണ്ട വേദന', kn: 'ಗಂಟಲು ನೋವು', mr: 'घसा खवखवणे', gu: 'ગળામાં દુખાવો', es: 'Dolor de garganta', fr: 'Mal de gorge' },
+    'Runny Nose': { hi: 'बहती नाक', te: 'ముక్కు కారటం', ta: 'மூக்கு ஒழுகுதல்', bn: 'নাক দিয়ে জল পড়া', ml: 'മൂക്കൊലിപ്പ്', kn: 'ಮೂಗು ಸೋರುವಿಕೆ', mr: 'नाक गळणे', gu: 'વહેતું નાક', es: 'Secreción nasal', fr: 'Écoulement nasal' },
+    'Sneezing': { hi: 'छींक आना', te: 'తుమ్ములు', ta: 'தும்மல்', bn: 'হাঁচি', ml: 'തുമ്മൽ', kn: 'ಸೀನು', mr: 'शिंका येणे', gu: 'છીંક આવવી', es: 'Estornudos', fr: 'Éternuements' },
+    'Wheezing': { hi: 'घबराहट', te: 'ఉబ్బసం', ta: 'இளைப்பு', bn: 'হাঁপানি', ml: 'വലിവ്', kn: 'ಉಬ್ಬಸ', mr: 'धाप लागणे', gu: 'ઘરઘરાટી', es: 'Sibilancias', fr: 'Respiration sifflante' },
+    'Chest Tightness': { hi: 'छाती में जकड़न', te: 'ఛాతీ బిగుతు', ta: 'நெஞ்சு இறுக்கம்', bn: 'বুকে চাপ', ml: 'നെഞ്ചെരിച്ചിൽ', kn: 'ಎದೆ ಬಿಗಿತ', mr: 'छातीत जडपणा', gu: 'છાતીમાં જકડાઈ જવું', es: 'Opresión en el pecho', fr: 'Oppression thoracique' },
+    'Hoarseness': { hi: 'गला बैठना', te: 'బొంగురు గొంతు', ta: 'கரகரப்பான குரல்', bn: 'গলা ভাঙা', ml: 'ശബ്ദമടപ്പ്', kn: 'ಗಂಟಲು ಕಟ್ಟುವುದು', mr: 'आवाज बसणे', gu: 'ઘોઘરો અવાજ', es: 'Ronquera', fr: 'Enrouement' },
+    'Nasal Congestion': { hi: 'नाक बंद', te: 'ముక్కు దిబ్బడ', ta: 'மூக்கடைப்பு', bn: 'নাক বন্ধ', ml: 'മൂക്കടപ്പ്', kn: 'ಮೂಗು ಕಟ್ಟುವುದು', mr: 'नाक बंद होणे', gu: 'નાક બંધ થવું', es: 'Congestión nasal', fr: 'Congestion nasale' },
+    'Headache': { hi: 'सिरदर्द', te: 'తలనొప్పి', ta: 'தலைவலி', bn: 'মাথাব্যথা', ml: 'തലവേദന', kn: 'ತಲೆನೋವು', mr: 'डोकेदुखी', gu: 'માથાનો દુખાવો', es: 'Dolor de cabeza', fr: 'Maux de tête' },
+    'Dizziness': { hi: 'चक्कर आना', te: 'తల తిరగడం', ta: 'தலைசுற்றல்', bn: 'মাথা ঘোরা', ml: 'തലകറക്കം', kn: 'ತಲೆತಿರುಗುವಿಕೆ', mr: 'चक्कर येणे', gu: 'ચક્કર આવવા', es: 'Mareos', fr: 'Vertiges' },
+    'Confusion': { hi: 'भ्रम', te: 'గందరగోళం', ta: 'குழப்பம்', bn: 'বিভ্রান্তি', ml: 'ആശയക്കുഴപ്പം', kn: 'ಗೊಂದಲ', mr: 'गोंधळ', gu: 'મૂંઝવણ', es: 'Confusión', fr: 'Confusion' },
+    'Numbness': { hi: 'सुन्न होना', te: 'తిమ్మిరి', ta: 'மரத்துப்போதல்', bn: 'অসাড়তা', ml: 'മരവിപ്പ്', kn: 'ಮರಗಟ್ಟುವಿಕೆ', mr: 'सुन्नपणा', gu: 'સુન્ન થઈ જવું', es: 'Entumecimiento', fr: 'Engourdissement' },
+    'Tingling': { hi: 'झुनझुनी', te: 'జులజుల', ta: 'ஜிவ்வுதல்', bn: 'ঝিনঝিন করা', ml: 'തരിപ്പ്', kn: 'ಜುಮ್ಮೆನಿಸುವಿಕೆ', mr: 'मुंग्या येणे', gu: 'ઝણઝણાટી', es: 'Hormigueo', fr: 'Picotements' },
+    'Tremors': { hi: 'कंपकंपी', te: 'వణుకు', ta: 'நடுக்கம்', bn: 'কাঁপুনি', ml: 'വിറയൽ', kn: 'ನಡುಕ', mr: 'थरथर', gu: 'ધ્રુજારી', es: 'Temblores', fr: 'Tremblements' },
+    'Fainting': { hi: 'बेहोशी', te: 'మూర్ఛ', ta: 'மயக்கம்', bn: 'অজ্ঞান হওয়া', ml: 'ബോധക്ഷയം', kn: 'ಮೂರ್ಛೆ', mr: 'मूर्च्छा', gu: 'બેભાન થવું', es: 'Desmayo', fr: 'Évanouissement' },
+    'Seizures': { hi: 'दौरे', te: 'ఫిట్స్', ta: 'வலிப்பு', bn: 'খিঁচুনি', ml: 'ഫിറ്റ്സ്', kn: 'ಮೂರ್ಛೆ ರೋಗ', mr: 'फेफरे', gu: 'આંચકી', es: 'Convulsiones', fr: 'Convulsions' },
+    'Memory Loss': { hi: 'याददाश्त की कमी', te: 'జ్ఞాపకశక్తి కోల్పోవడం', ta: 'நினைவாற்றல் இழப்பு', bn: 'স্মৃতিশক্তি হ্রাস', ml: 'ഓർമ്മക്കുറവ്', kn: 'ನೆನಪಿನ ಶಕ್ತಿ ನಷ್ಟ', mr: 'स्मरणशक्ती कमी होणे', gu: 'યાદશક્તિ ગુમાવવી', es: 'Pérdida de memoria', fr: 'Perte de mémoire' },
+    'Balance Issues': { hi: 'संतुलन की समस्या', te: 'సమతుల్యత సమస్యలు', ta: 'சமநிலை பிரச்சனைகள்', bn: 'ভারসাম্য সমস্যা', ml: 'സന്തുലിതാവസ്ഥ പ്രശ്നങ്ങൾ', kn: 'ಸಮತೋಲನ ಸಮಸ್ಯೆಗಳು', mr: 'तोल जाणे', gu: 'સંતુલન સમસ્યાઓ', es: 'Problemas de equilibrio', fr: 'Problèmes d\'équilibre' },
+    'Nausea': { hi: 'मतली', te: 'వికారం', ta: 'குமட்டல்', bn: 'বমি ভাব', ml: 'ഓക്കാനം', kn: 'ವಾಕರಿಕೆ', mr: 'मळमळ', gu: 'ઉબકા', es: 'Náuseas', fr: 'Nausées' },
+    'Vomiting': { hi: 'उल्टी', te: 'వాంతులు', ta: 'வாந்தி', bn: 'বমি', ml: 'ഛർദ്ദി', kn: 'ವಾಂತಿ', mr: 'उलट्या', gu: 'ઉલટી', es: 'Vómitos', fr: 'Vomissements' },
+    'Diarrhea': { hi: 'दस्त', te: 'విరేచనాలు', ta: 'வயிற்றுப்போக்கு', bn: 'ডায়রিয়া', ml: 'അതിസാരം', kn: 'ಅತಿಸಾರ', mr: 'अतिसार', gu: 'ઝાડા', es: 'Diarrea', fr: 'Diarrhée' },
+    'Constipation': { hi: 'कब्ज', te: 'మలబద్ధకం', ta: 'மலச்சிக்கல்', bn: 'কোষ্ঠকাঠিন্য', ml: 'മലബന്ധം', kn: 'ಮಲಬದ್ಧತೆ', mr: 'बद्धकोष्ठता', gu: 'કબજિયાત', es: 'Estreñimiento', fr: 'Constipation' },
+    'Stomach Pain': { hi: 'पेट दर्द', te: 'కడుపు నొప్పి', ta: 'வயிற்று வலி', bn: 'পেট ব্যথা', ml: 'വയറുവേദന', kn: 'ಹೊಟ್ಟೆ ನೋವು', mr: 'पोटदुखी', gu: 'પેટનો દુખાવો', es: 'Dolor de estómago', fr: 'Maux d\'estomac' },
+    'Bloating': { hi: 'पेट फूलना', te: 'ఉబ్బరం', ta: 'வயிறு உப்பசம்', bn: 'পেট ফোলা', ml: 'വയറു വീർക്കുക', kn: 'ಹೊಟ್ಟೆ ಉಬ್ಬರ', mr: 'पोट फुगणे', gu: 'પેટ ફૂલવું', es: 'Hinchazón', fr: 'Ballonnements' },
+    'Heartburn': { hi: 'सीने में जलन', te: 'గుండెల్లో మంట', ta: 'நெஞ்செரிச்சல்', bn: 'বুকজ্বালা', ml: 'നെഞ്ചെരിച്ചിൽ', kn: 'ಎದೆಯುರಿ', mr: 'छातीत जळजळ', gu: 'છાતીમાં બળતરા', es: 'Acidez estomacal', fr: 'Brûlures d\'estomac' },
+    'Loss of Appetite': { hi: 'भूख में कमी', te: 'ఆకలి లేకపోవడం', ta: 'பசியின்மை', bn: 'ক্ষুধা হ্রাস', ml: 'വിശപ്പില്ലായ്മ', kn: 'ಹಸಿವಾಗದಿರುವುದು', mr: 'भूक न लागणे', gu: 'ભૂખ ન લાગવી', es: 'Pérdida de apetito', fr: 'Perte d\'appétit' },
+    'Acid Reflux': { hi: 'एसिड रिफ्लक्स', te: 'యాసిడ్ రిఫ్లక్స్', ta: 'அமில வீச்சு', bn: 'এসিড রিফ্লাক্স', ml: 'ആസിഡ് റിഫ്ലക്സ്', kn: 'ಆಸಿಡ್ ರಿಫ್ಲಕ್ಸ್', mr: 'आम्लपित्त', gu: 'એસિડ રિફ્લક્સ', es: 'Reflujo ácido', fr: 'Reflux gastrique' },
+    'Muscle Pain': { hi: 'मांसपेशियों में दर्द', te: 'కండరాల నొప్పి', ta: 'தசை வலி', bn: 'পেশী ব্যথা', ml: 'പേശി വേദന', kn: 'ಸ್ನಾಯು ನೋವು', mr: 'स्नायू दुखणे', gu: 'સ્નાયુમાં દુખાવો', es: 'Dolor muscular', fr: 'Douleurs musculaires' },
+    'Joint Pain': { hi: 'जोड़ों का दर्द', te: 'కీళ్ళ నొప్పి', ta: 'மூட்டு வலி', bn: 'জয়েন্টে ব্যথা', ml: 'സന്ധി വേദന', kn: 'ಕೀಲು ನೋವು', mr: 'सांधेदुखी', gu: 'સાંધાનો દુખાવો', es: 'Dolor articular', fr: 'Douleurs articulaires' },
+    'Back Pain': { hi: 'पीठ दर्द', te: 'నడుము నొప్పి', ta: 'முதுகு வலி', bn: 'পিঠে ব্যথা', ml: 'നടുവേദന', kn: 'ಬೆನ್ನುನೋವು', mr: 'पाठदुखी', gu: 'પીઠનો દુખાવો', es: 'Dolor de espalda', fr: 'Mal de dos' },
+    'Neck Pain': { hi: 'गर्दन में दर्द', te: 'మెడ నొప్పి', ta: 'கழுத்து வலி', bn: 'ঘাড় ব্যথা', ml: 'കഴുത്ത് വേദന', kn: 'ಕುತ್ತಿಗೆ ನೋವು', mr: 'मानदुखी', gu: 'ગરદનનો દુખાવો', es: 'Dolor de cuello', fr: 'Douleurs cervicales' },
+    'Stiff Neck': { hi: 'गर्दन में अकड़न', te: 'మెడ పట్టుకోవడం', ta: 'கழுத்து பிடிப்பு', bn: 'ঘাড় শক্ত হওয়া', ml: 'കഴുത്ത് ഞരമ്പ് പിടുത്തം', kn: 'ಕುತ್ತಿಗೆ ಹಿಡಿತ', mr: 'मान आखडणे', gu: 'ગરદન જકડાઈ જવી', es: 'Cuello rígido', fr: 'Raideur de la nuque' },
+    'Swelling': { hi: 'सूजन', te: 'వాపు', ta: 'வீக்கம்', bn: 'ফোলা', ml: 'വീക്കം', kn: 'ಊತ', mr: 'सूज', gu: 'સોજો', es: 'Hinchazón', fr: 'Gonflement' },
+    'Muscle Cramps': { hi: 'मांसपेशियों में ऐंठन', te: 'కండరాల తిమ్మిరి', ta: 'தசைப்பிடிப்பு', bn: 'পেশীতে টান', ml: 'പേശി വലിവ്', kn: 'ಸ್ನಾಯು ಸೆಳೆತ', mr: 'स्नायू गोळे येणे', gu: 'સ્નાયુ ખેંચાણ', es: 'Calambres musculares', fr: 'Crampes musculaires' },
+    'Skin Rash': { hi: 'त्वचा पर चकत्ते', te: 'చర్మం దద్దుర్లు', ta: 'தோல் தடிப்பு', bn: 'ত্বকে ফুসকুড়ি', ml: 'ചർമ്മത്തിൽ തിണർപ്പ്', kn: 'ಚರ್ಮದ ದದ್ದು', mr: 'त्वचेवर पुरळ', gu: 'ત્વચા પર ફોલ્લીઓ', es: 'Erupción cutánea', fr: 'Éruption cutanée' },
+    'Itching': { hi: 'खुजली', te: 'దురద', ta: 'அரிப்பு', bn: 'চুলকানি', ml: 'ചൊറിച്ചിൽ', kn: 'ತುರಿಕೆ', mr: 'खाज सुटणे', gu: 'ખંજવાળ', es: 'Picazón', fr: 'Démangeaisons' },
+    'Blurred Vision': { hi: 'धुंधली दृष्टि', te: 'మసక బారిన దృష్టి', ta: 'மங்கலான பார்வை', bn: 'অস্পষ্ট দৃষ্টি', ml: 'മങ്ങിയ കാഴ്ച', kn: 'ಮಂಜಾದ ದೃಷ್ಟಿ', mr: 'अंधुक दृष्टी', gu: 'ધૂંધળી દ્રષ્ટિ', es: 'Visión borrosa', fr: 'Vision floue' },
+    'Red Eyes': { hi: 'लाल आंखें', te: 'కళ్ళు ఎర్రబడటం', ta: 'கண்கள் சிவத்தல்', bn: 'চোখ লাল হওয়া', ml: 'കണ്ണ് ചുവക്കൽ', kn: 'ಕೆಂಪು ಕಣ್ಣುಗಳು', mr: 'डोळे लाल होणे', gu: 'લાલ આંખો', es: 'Ojos rojos', fr: 'Yeux rouges' },
+    'Eye Pain': { hi: 'आंख में दर्द', te: 'కంటి నొప్పి', ta: 'கண் வலி', bn: 'চোখে ব্যথা', ml: 'കണ്ണ് വേദന', kn: 'ಕಣ್ಣು ನೋವು', mr: 'डोळे दुखणे', gu: 'આંખમાં દુખાવો', es: 'Dolor ocular', fr: 'Douleur oculaire' },
+    'Skin Peeling': { hi: 'त्वचा का छिलना', te: 'చర్మం పొట్టు ఊడటం', ta: 'தோல் உரிதல்', bn: 'ত্বকের খোসা ওঠা', ml: 'തൊലി അടരുക', kn: 'ಚರ್ಮ ಸುಲಿಯುವುದು', mr: 'त्वचा सोलणे', gu: 'ત્વચા છોલાવી', es: 'Descamación de la piel', fr: 'Desquamation de la peau' },
+    'Dry Skin': { hi: 'सूखी त्वचा', te: 'పొడి చర్మం', ta: 'வறண்ட தோல்', bn: 'শুষ্ক ত্বক', ml: 'വരണ്ട ചർമ്മം', kn: 'ಒಣ ಚರ್ಮ', mr: 'कोरडी त्वचा', gu: 'સૂકી ત્વચા', es: 'Piel seca', fr: 'Peau sèche' },
+    'Chest Pain': { hi: 'छाती में दर्द', te: 'ఛాతీ నొప్పి', ta: 'நெஞ்சு வலி', bn: 'বুকে ব্যথা', ml: 'നെഞ്ചുവേദന', kn: 'ಎದೆ ನೋವು', mr: 'छातीत दुखणे', gu: 'છાતીમાં દુખાવો', es: 'Dolor en el pecho', fr: 'Douleur thoracique' },
+    'Palpitations': { hi: 'धड़कन तेज होना', te: 'గుండె దడ', ta: 'படபடப்பு', bn: 'বুক ধড়ফড়ানি', ml: 'നെഞ്ചിടിപ്പ്', kn: 'ಎದೆಬಡಿತ', mr: 'धडधड', gu: 'છાતીમાં ધબકારા', es: 'Palpitaciones', fr: 'Palpitations' },
+    'Cold Hands/Feet': { hi: 'ठंडे हाथ/पैर', te: 'చల్లని చేతులు/కాళ్ళు', ta: 'குளிர்ந்த கைகள்/கால்கள்', bn: 'ঠান্ডা হাত/পা', ml: 'തണുത്ത കൈകൾ/കാലുകൾ', kn: 'ತಣ್ಣನೆಯ ಕೈಗಳು/ಕಾಲುಗಳು', mr: 'थंड हात/पाय', gu: 'ઠંડા હાથ/પગ', es: 'Manos/pies fríos', fr: 'Mains/pieds froids' },
+    'Rapid Heartbeat': { hi: 'तेज धड़कन', te: 'వేగవంతమైన గుండె స్పందన', ta: 'துரித இதயத்துடிப்பு', bn: 'দ্রুত হৃদস্পন্দন', ml: 'വേഗത്തിലുള്ള ഹൃദയമിടിപ്പ്', kn: 'ವೇಗದ ಹೃದಯ ಬಡಿತ', mr: 'वेगवान ठोके', gu: 'ઝડપી ધબકારા', es: 'Latidos cardíacos rápidos', fr: 'Rythme cardiaque rapide' },
+    'Anxiety': { hi: 'चिंता', te: 'ఆందోళన', ta: 'கவலை', bn: 'উদ্বেग', ml: 'ഉത്കണ്ഠ', kn: 'ಆತಂಕ', mr: 'चिंता', gu: 'ચિંતા', es: 'Ansiedad', fr: 'Anxiété' },
+    'Depression': { hi: 'अवसाद', te: 'విషాదం', ta: 'மனச்சோர்வு', bn: 'হতাশা', ml: 'വിഷാദം', kn: 'ಖಿನ್ನತೆ', mr: 'नैराश्य', gu: 'ડિપ્રેશન', es: 'Depresión', fr: 'Dépression' },
+    'Insomnia': { hi: 'अनिद्रा', te: 'నిద్రలేమి', ta: 'தூக்கமின்மை', bn: 'অনিদ্রা', ml: 'ഉറക്കമില്ലായ്മ', kn: 'ನಿದ್ರಾಹೀನತೆ', mr: 'निद्रानाश', gu: 'અનિદ્રા', es: 'Insomnio', fr: 'Insomnie' },
+    'Frequent Urination': { hi: 'बार-बार पेशाब आना', te: 'తరచుగా మూత్రవిసర్జన', ta: 'அடிக்கடி சிறுநீர் கழித்தல்', bn: 'ঘন ঘন প্রস্রাব', ml: 'ഇടയ്ക്കിടെയുള്ള മൂത്രമൊഴിക്കൽ', kn: 'ಆಗಾಗ್ಗೆ ಮೂತ್ರವಿಸರ್ಜನೆ', mr: 'वारंवार लघवी होणे', gu: 'વારંવાર પેશાબ થવો', es: 'Micción frecuente', fr: 'Miction fréquente' },
+    'Painful Urination': { hi: 'पेशाब में दर्द', te: 'మూత్ర విసర్జనలో నొప్పి', ta: 'சிறுநீர் கழிக்கும் போது வலி', bn: 'প্রস্রাবের সময় ব্যথা', ml: 'മൂത്രമൊഴിക്കുമ്പോൾ വേദന', kn: 'ಮೂತ್ರವಿಸರ್ಜನೆಯಲ್ಲಿ ನೋವು', mr: 'लघवी करताना वेदना', gu: 'પેશાબ કરતી વખતે દુખાવો', es: 'Micción dolorosa', fr: 'Miction douloureuse' },
+    'Difficulty Swallowing': { hi: 'निगलने में कठिनाई', te: 'మింగడంలో కష్టం', ta: 'விழுங்குவதில் சிரமம்', bn: 'গিলতে অসুবিধা', ml: 'വിഴുങ്ങാൻ ബുദ്ധിമുട്ട്', kn: 'ನುಂಗಲು ಕಷ್ಟ', mr: 'गिळताना त्रास', gu: 'ગળવામાં તકલીફ', es: 'Dificultad para tragar', fr: 'Difficulté à avaler' },
+    'Ear Pain': { hi: 'कान में दर्द', te: 'చెవి నొప్పి', ta: 'காதில் வலி', bn: 'কানে ব্যথা', ml: 'ചെവി വേദന', kn: 'ಕಿವಿ ನೋವು', mr: 'कानदुखी', gu: 'કાનમાં દુખાવો', es: 'Dolor de oído', fr: 'Mal d\'oreille' }
+  };
+  return symptoms[symptom]?.[lang] || symptom;
+};
+
 interface SymptomCheckerProps {
   userTier: UserTier;
   onConsultAI?: (message: string) => void;
@@ -388,7 +469,7 @@ export default function SymptomChecker({ userTier, onConsultAI, onNavigate, lang
                                 : "bg-white text-slate-600 border-slate-100 hover:border-brand-200"
                             )}
                           >
-                            {s}
+                            {getLocalizedSymptom(s, language)}
                           </button>
                         ))}
                         {filteredSymptoms.length === 0 && (
@@ -406,7 +487,7 @@ export default function SymptomChecker({ userTier, onConsultAI, onNavigate, lang
                         <div key={group} className="space-y-4">
                           <div className="flex items-center gap-3 px-2">
                             <div className="w-1 h-4 bg-brand-500 rounded-full" />
-                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{group}</label>
+                            <label className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{getLocalizedGroup(group, language)}</label>
                           </div>
                           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
                             {symptoms.map((s, idx) => (
@@ -420,7 +501,7 @@ export default function SymptomChecker({ userTier, onConsultAI, onNavigate, lang
                                     : "bg-white text-slate-600 border-slate-100 hover:border-brand-200"
                                 )}
                               >
-                                {s}
+                                {getLocalizedSymptom(s, language)}
                               </button>
                             ))}
                           </div>
@@ -444,7 +525,7 @@ export default function SymptomChecker({ userTier, onConsultAI, onNavigate, lang
                             key={`selected-${idx}-${s}`} 
                             className="flex items-center gap-2 px-4 py-2 bg-white border border-brand-200 text-brand-700 rounded-2xl text-xs font-bold shadow-sm"
                           >
-                            {s}
+                            {getLocalizedSymptom(s, language)}
                             <button onClick={() => removeSymptom(s)} className="hover:text-rose-500 transition-colors">
                               <X size={14} />
                             </button>

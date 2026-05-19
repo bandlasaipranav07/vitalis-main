@@ -15,8 +15,8 @@ Your responsibilities:
 If the user asks non-medical questions such as coding, finance, politics, entertainment, hacking, gambling, or unrelated topics, respond with:
 “I am designed specifically for healthcare and medical assistance. Please ask a health-related question.”
 
-If confidence is low or information is insufficient, respond with:
-“I am not knowledgeable enough about this topic to provide a reliable answer. Please consult a qualified healthcare professional.”
+If confidence is low or information is insufficient, or you do not know the answer, respond with:
+“I am not knowledgeable in this area. Please try to consult a medical professional.”
 
 Always prioritize:
 1. Medical accuracy
@@ -265,8 +265,8 @@ If symptoms include:
 Immediately advise emergency medical care.
 
 Fallback Rule:
-If uncertain, say:
-“I do not have enough reliable information to answer this safely. Please consult a healthcare professional.”`;
+If uncertain or you do not know the answer, say:
+“I am not knowledgeable in this area. Please try to consult a medical professional.”`;
 
       const systemInstruction = SYSTEM_INSTRUCTION + `\n\nOutput strictly JSON for the structured report. All text fields MUST be in ${langName}.`;
       
@@ -287,7 +287,7 @@ If uncertain, say:
       const response = await fetch("/api/gemini/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, systemInstruction, responseSchema, language })
+        body: JSON.stringify({ prompt, systemInstruction, responseSchema, language, severity, duration })
       });
 
       if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
@@ -539,7 +539,7 @@ Determine if it is BANNED, RESTRICTED, or COMMON. provide the specific reason if
     if (isHindi) {
       return {
         healthSummary: "परामर्श की सिफारिश की जाती है",
-        possibleCauses: ["क्षमा करें, मुझे इस हिस्से में जानकारी नहीं है। कृपया डॉक्टर से सलाह लेने का प्रयास करें।"],
+        possibleCauses: ["मुझे इस क्षेत्र में जानकारी नहीं है। कृपया किसी चिकित्सा पेशेवर से परामर्श करने का प्रयास करें।"],
         riskLevel: "Moderate",
         recommendations: ["सटीक निदान के लिए कृपया किसी स्वास्थ्य पेशेवर से परामर्श लें।"],
         warningSigns: [],
@@ -550,7 +550,7 @@ Determine if it is BANNED, RESTRICTED, or COMMON. provide the specific reason if
     if (isTelugu) {
       return {
         healthSummary: "సంప్రదింపులు సిఫార్సు చేయబడింది",
-        possibleCauses: ["క్షమించండి, నాకు ఈ విభాగంలో తగినంత పరిజ్ఞానం లేదు. దయచేసి వైద్యుడిని సంప్రదించడానికి ప్రయత్నించండి."],
+        possibleCauses: ["నాకు ఈ రంగంలో పరిజ్ఞానం లేదు. దయచేసి వైద్య నిపుణుడిని సంప్రదించడానికి ప్రయత్నించండి."],
         riskLevel: "Moderate",
         recommendations: ["ఖచ్చితమైన నిర్ధారణ కోసం దయచేసి ఆరోగ్య నిపుణుడిని సంప్రదించండి."],
         warningSigns: [],
@@ -561,7 +561,7 @@ Determine if it is BANNED, RESTRICTED, or COMMON. provide the specific reason if
     if (isTamil) {
       return {
         healthSummary: "ஆலோசனை பரிந்துரைக்கப்படுகிறது",
-        possibleCauses: ["மன்னிக்கவும், இந்த பகுதியில் எனக்கு போதுமான அறிவு இல்லை. தயவுசெய்து மருத்துவரை அணுகவும்."],
+        possibleCauses: ["எனக்கு இந்தத் துறையில் போதிய அறிவு இல்லை. தயவுசெய்து ஒரு மருத்துவ நிபுணரை அணுக முயற்சிக்கவும்."],
         riskLevel: "Moderate",
         recommendations: ["துல்லியமான நோயறிதலுக்கு ஒரு தகுதி வாய்ந்த மருத்துவரை அணுகவும்."],
         warningSigns: [],
@@ -583,7 +583,7 @@ Determine if it is BANNED, RESTRICTED, or COMMON. provide the specific reason if
     if (isKannada) {
       return {
         healthSummary: "ಸಮಾಲೋಚನೆ ಶಿಫಾರಸು ಮಾಡಲಾಗಿದೆ",
-        possibleCauses: ["ಕ್ಷಮಿಸಿ, ನನಗೆ ಈ ಭಾಗದಲ್ಲಿ ಸಾಕಷ್ಟು ಜ್ಞಾನವಿಲ್ಲ. ದಯವಿಟ್ಟು ವೈದ್ಯರನ್ನು ಸಂಪರ್ಕಿಸಲು ಪ್ರಯತ್ನಿಸಿ."],
+        possibleCauses: ["ನನಗೆ ಈ ಕ್ಷೇತ್ರದಲ್ಲಿ ಜ್ಞಾನವಿಲ್ಲ. ದಯವಿಟ್ಟು ವೈದ್ಯಕೀಯ ವೃತ್ತಿಪರರನ್ನು ಸಂಪರ್ಕಿಸಲು ಪ್ರಯತ್ನಿಸಿ."],
         riskLevel: "Moderate",
         recommendations: ["ನಿಖರವಾದ ರೋಗನಿರ್ಣಯಕ್ಕಾಗಿ ದಯವಿಟ್ಟು ಆರೋಗ್ಯ ವೃತ್ತಿಪರರನ್ನು ಸಂಪರ್ಕಿಸಿ."],
         warningSigns: [],
@@ -594,7 +594,7 @@ Determine if it is BANNED, RESTRICTED, or COMMON. provide the specific reason if
 
     return {
       healthSummary: "Consultation Recommended",
-      possibleCauses: ["Sorry, I am not knowledgeable in this part. Please try to consult a doctor."],
+      possibleCauses: ["I am not knowledgeable in this area. Please try to consult a medical professional."],
       riskLevel: "Moderate",
       recommendations: ["Please consult a healthcare professional for an accurate diagnosis."],
       warningSigns: [],
