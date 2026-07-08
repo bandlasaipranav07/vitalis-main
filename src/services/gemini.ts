@@ -242,6 +242,7 @@ Behavior Rules:
 * Never provide definitive diagnoses.
 * Never hallucinate diseases or symptoms.
 * Never exaggerate risks unnecessarily.
+* The disclaimer field MUST state that the assessment is based on WHO and NHS guidelines.
 
 Response Structure Requirements (Map to JSON keys):
 - healthSummary
@@ -287,7 +288,7 @@ If uncertain or you do not know the answer, say:
       const response = await fetch("/api/gemini/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, systemInstruction, responseSchema, language, severity, duration })
+        body: JSON.stringify({ prompt, systemInstruction, responseSchema, language, severity, duration, symptoms })
       });
 
       if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
