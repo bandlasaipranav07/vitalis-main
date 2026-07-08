@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { GoogleGenAI } from "@google/genai";
-import { LocalClinicalEngine } from "../_lib/local-clinical-engine.js";
+import { LocalClinicalEngine } from "../_lib/local-clinical-engine";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const DEFAULT_MODEL = "gemini-2.5-flash";
@@ -18,7 +18,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
   res.setHeader("Connection", "keep-alive");
   res.setHeader("X-Content-Type-Options", "nosniff");
 
-  const { history = [], parts, systemInstruction, model = DEFAULT_MODEL } = req.body;
+  const { history = [], parts, systemInstruction, model = DEFAULT_MODEL, language = "en" } = req.body;
 
   try {
     const response = await ai.models.generateContentStream({
@@ -44,7 +44,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
         const textPart = parts.find((p: any) => p.text);
         if (textPart) promptText = textPart.text;
       }
-      const fallback = await LocalClinicalEngine.generateChatResponse([promptText], "en");
+      const fallback = await LocalClinicalEngine.generateChatResponse([promptText], language);
       res.write(`data: ${JSON.stringify({ text: fallback })}\n\n`);
       res.write("data: [DONE]\n\n");
       res.end();

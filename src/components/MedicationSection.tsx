@@ -9,24 +9,29 @@ import { useToast } from '../contexts/ToastContext';
 
 const getMedTranslation = (key: string, lang: Language) => {
   const mapping: Record<string, Partial<Record<Language, string>>> = {
-    takeMeds: { en: "Take meds at the same time daily.", hi: "दवाएं रोजाना एक ही समय पर लें।", te: "రోజూ ఒకే సమయానికి మందులు వేసుకోండి.", ta: "தினமும் ஒரே நேரத்தில் மருந்துகளை எடுத்துக் கொள்ளுங்கள்.", bn: "প্রতিদিন একই সময়ে ওষুধ খান।", ml: "എല്ലാ ദിവസവും ഒരേ സമയത്ത് മരുന്നുകൾ കഴിക്കുക.", kn: "ಪ್ರತಿದಿನ ಒಂದೇ ಸಮಯದಲ್ಲಿ ಔಷಧಿಗಳನ್ನು ತೆಗೆದುಕೊಳ್ಳಿ.", mr: "रोज एकाच वेळी औषधे घ्या.", gu: "દરરોજ એક જ સમયે દવાઓ લો.", es: "Tome los medicamentos a la misma hora todos los días.", fr: "Prenez les médicaments à la même heure tous les jours." },
-    drinkWater: { en: "Drink water with oral medications.", hi: "मौखिक दवाओं के साथ पानी पिएं।", te: "మౌఖిక మందులతో నీరు త్రాగండి.", ta: "வாய்வழி மருந்துகளுடன் தண்ணீர் குடிக்கவும்.", bn: "মৌখিক ওষুধের সাথে জল পান করুন।", ml: "മരുന്നുകൾക്കൊപ്പം വെള്ളം കുടിക്കുക.", kn: "ಔಷಧಿಗಳೊಂದಿಗೆ ನೀರು ಕುಡಿಯಿರಿ.", mr: "तोंडी औषधांसोबत पाणी प्या.", gu: "દવાઓ સાથે પાણી પીવો.", es: "Beba agua con los medicamentos orales.", fr: "Buvez de l'eau avec les médicaments par voie orale." },
+    takeMeds: { en: "Take meds at the same time daily.", hi: "दवाएं रोजाना एक ही समय पर लें।", te: "రోజూ ఒకే సమయానికి మందులు వేసుకోండి.", ta: "தினமும் ஒரே நேரத்தில் மருந்துகளை எடுத்துக் கொள்ளுங்கள்.", bn: "প্রতিদিন একই সময়ে ঔষধ খান।", ml: "എല്ലാ ദിവസവും ഒരേ സമയത്ത് മരുന്നുകൾ കഴിക്കുക.", kn: "ಪ್ರತಿದಿನ ಒಂದೇ ಸಮಯದಲ್ಲಿ ಔಷಧಿಗಳನ್ನು ತೆಗೆದುಕೊಳ್ಳಿ.", mr: "रोज एकाच वेळी औषधे घ्या.", gu: "દરરોજ એક જ સમયે દવાઓ લો.", es: "Tome los medicamentos a la misma hora todos los días.", fr: "Prenez les médicaments à la même heure tous les jours." },
+    drinkWater: { en: "Drink water with oral medications.", hi: "मौखिक दवाओं के साथ पानी पिएं।", te: "మౌఖిక మందులతో నీరు త్రాగండి.", ta: "வாய்வழி மருந்துகளுடன் தண்ணீர் குடிக்கவும்.", bn: "মৌখিক ঔষধের সাথে জল পান করুন।", ml: "മരുന്നുകൾക്കൊപ്പം വെള്ളം കുടിക്കുക.", kn: "ಔಷಧಿಗಳೊಂದಿಗೆ ನೀರು ಕುಡಿಯಿರಿ.", mr: "तोंडी औषधांसोबत पाणी प्या.", gu: "દવાઓ સાથે પાણી પીવો.", es: "Beba agua con los medicamentos orales.", fr: "Buvez de l'eau avec les médicaments par voie orale." },
+    keepOutReach: { en: "Keep out of reach", hi: "पहुंच से दूर रखें", te: "అందుబాటులో లేకుండా ఉంచండి", ta: "எட்டாதவாறு வைக்கவும்", bn: "নাগালের বাইরে রাখুন", ml: "കൈയെത്താത്ത ദൂരത്തിൽ സൂക്ഷിക്കുക", kn: "ಕೈಗೆಟುಕದಂತೆ ಇಡಿ", mr: "आवाक्याबाहेर ठेवा", gu: "પહોંચથી દૂર રાખો", es: "Mantener fuera del alcance", fr: "Tenir hors de portée" },
+    medSafetyHeader: { en: "Medication Safety", hi: "दवा सुरक्षा", te: "ఔషధ భద్రత", ta: "மருந்து பாதுகாப்பு", bn: "ঔষধের নিরাপত্তা", ml: "മരുന്നുകളുടെ സുരക്ഷ", kn: "ಔಷಧ ಭದ್ರತೆ", mr: "औषध सुरक्षा", gu: "દવા સુરક્ષા", es: "Seguridad de medicamentos", fr: "Sécurité des médicaments" },
+    medCompliance: { en: "Compliance", hi: "अनुपालन", te: "అనుసరణ", ta: "கட்டுப்பாடு", bn: "অনুগত্য", ml: "പാലനം", kn: "ಅನುಸರಣೆ", mr: "अनुपालन", gu: "અનુસરણ", es: "Cumplimiento", fr: "Conformité" },
+    searchPlaceholder: { en: "Medication name...", hi: "दवा का नाम...", te: "ఔషధ పేరు...", ta: "மருந்து பெயர்...", bn: "ঔষধের নাম...", ml: "മരുന്നിന്റെ പേര്...", kn: "ಔಷಧದ ಹೆಸರು...", mr: "औषधाचे नाव...", gu: "દવા નામ...", es: "Nombre del medicamento...", fr: "Nom du médicament..." },
+    checkButton: { en: "Check", hi: "जांचें", te: "పరిశీలించండి", ta: "சரிபார்க்க", bn: "যাচাই করুন", ml: "പരിശോധിക്കുക", kn: "ಪರಿಶೀಲಿಸಿ", mr: "तपासा", gu: "ચેક કરો", es: "Verificar", fr: "Vérifier" },
     checkExpiry: { en: "Check expiry dates before use.", hi: "उपयोग करने से पहले समाप्ति तिथि जांचें।", te: "ఉపయోగించే ముందు గడువు తేదీని తనిఖీ చేయండి.", ta: "பயன்படுத்துவதற்கு முன் காலாவதி தேதியை சரிபார்க்கவும்.", bn: "ব্যবহারের আগে মেয়াদোত্তীর্ণের তারিখ পরীক্ষা করুন।", ml: "ഉപയോഗിക്കുന്നതിന് മുമ്പ് കാലാവധി തീരുന്ന തീയതി പരിശോധിക്കുക.", kn: "ಬಳಸುವ ಮುನ್ನ ಮುಕ್ತಾಯ ದಿನಾಂಕವನ್ನು ಪರಿಶೀಲಿಸಿ.", mr: "वापरण्यापूर्वी एक्सपायरी डेट तपासा.", gu: "ઉપયોગ કરતા પહેલા સમાપ્તિ તારીખ તપાસો.", es: "Verifique las fechas de caducidad antes de usar.", fr: "Vérifiez les dates de péremption avant utilisation." },
     keepPrescriptions: { en: "Keep prescriptions handy.", hi: "पर्चे संभाल कर रखें।", te: "ప్రిస్క్రిప్షన్లను అందుబాటులో ఉంచండి.", ta: "மருந்து சீட்டுகளை கைவசம் வைத்திருக்கவும்.", bn: "প্রেসক্রিপশন হাতের কাছে রাখুন।", ml: "കുറിപ്പടികൾ കൈവശം വയ്ക്കുക.", kn: "ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್‌ಗಳನ್ನು ಕೈಯಲ್ಲಿಡಿ.", mr: "प्रिस्क्रिप्शन जवळ ठेवा.", gu: "પ્રિસ્ક્રિપ્શન હાથમાં રાખો.", es: "Tenga a mano las recetas.", fr: "Gardez les ordonnances à portée de main." },
-    storeCool: { en: "Store in a cool, dry place.", hi: "ठंडी, सूखी जगह पर रखें।", te: "చల్లని, పొడి ప్రదేశంలో నిల్వ చేయండి.", ta: "குளிர்ந்த, உலர்வான இடத்தில் சேமிக்கவும்.", bn: "ঠান্ডা, শুষ্ক স্থানে সংরক্ষণ করুন।", ml: "തണുത്തതും ഉണങ്ങിയതുമായ സ്ഥലത്ത് സൂക്ഷിക്കുക.", kn: "ತಂಪಾದ, ಒಣ ಸ್ಥಳದಲ್ಲಿ ಶೇಖರಿಸಿಡಿ.", mr: "थंड, कोरड्या जागी साठवा.", gu: "ઠંડી, સૂકી જગ્યાએ સંગ્રહ કરો.", es: "Guarde en un lugar fresco y seco.", fr: "Conservez dans un endroit frais et sec." },
+    storeCool: { en: "Store in a cool, dry place.", hi: "ठंडी, सूखी जगह पर रखें।", te: "చల్లని, పొడి ప్రదేశంలో నిల్వ చేయండి.", ta: "குளிர்ந்த, உலர்ந்த இடத்தில் சேமிக்கவும்.", bn: "ঠান্ডা, শুষ্ক স্থানে সংরক্ষণ করুন।", ml: "തണുത്തതും ഉണങ്ങിയതുമായ സ്ഥലത്ത് സൂക്ഷിക്കുക.", kn: "ತಂಪಾದ, ಒಣ ಸ್ಥಳದಲ್ಲಿ ಶೇಖರಿಸಿಡಿ.", mr: "थंड, कोरड्या जागी साठवा.", gu: "ઠંડી, સૂકી જગ્યાએ સંગ્રહ કરો.", es: "Guarde en un lugar fresco y seco.", fr: "Conservez dans un endroit frais et sec." },
     keepChildren: { en: "Keep away from children.", hi: "बच्चों से दूर रखें।", te: "పిల్లలకు దూరంగా ఉంచండి.", ta: "குழந்தைகளிடமிருந்து விலக்கி வைக்கவும்.", bn: "শিশুদের থেকে দূরে রাখুন।", ml: "കുട്ടികളിൽ നിന്ന് അകറ്റി നിർത്തുക.", kn: "ಮಕ್ಕಳಿಂದ ದೂರವಿಡಿ.", mr: "मुलांपासून दूर ठेवा.", gu: "બાળકોથી દૂર રાખો.", es: "Mantener fuera del alcance de los niños.", fr: "Tenir hors de portée des enfants." },
-    neverShare: { en: "Never share your prescriptions.", hi: "अपने पर्चे कभी साझा न करें।", te: "మీ ప్రిస్క్రిప్షన్లను ఎప్పుడూ పంచుకోవద్దు.", ta: "உங்கள் மருந்து சீட்டுகளை ஒருபோதும் பகிர வேண்டாம்.", bn: "কখনই আপনার প্রেসক্রিপশন শেয়ার করবেন না।", ml: "നിങ്ങളുടെ കുറിപ്പടികൾ ഒരിക്കലും പങ്കിടരുത്.", kn: "ನಿಮ್ಮ ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್‌ಗಳನ್ನು ಎಂದಿಗೂ ಹಂಚಿಕೊಳ್ಳಬೇಡಿ.", mr: "तुमची प्रिस्क्रिप्शन कधीही शेअर करू नका.", gu: "તમારી પ્રિસ્ક્રિપ્શન ક્યારેય શેર કરશો નહીં.", es: "Nunca comparta sus recetas.", fr: "Ne partagez jamais vos ordonnances." },
-    
-    // Adult safety
-    followDosage: { en: "Follow prescribed dosage", hi: "निर्धारित खुराक का पालन करें", te: "సూచించిన మోతాదును అనుసరించండి", ta: "பரிந்துரைக்கப்பட்ட அளவை பின்பற்றவும்", bn: "নির্ধারিত ডোজ অনুসরণ করুন", ml: "നിർദ്ദേശിച്ച ഡോസ് പിന്തുടരുക", kn: "ಸೂಚಿಸಲಾದ ಡೋಸೇಜ್ ಅನುಸರಿಸಿ", mr: "विहित डोसचे पालन करा", gu: "નિર્ધારિત ડોઝને અનુસરો", es: "Siga la dosis prescrita", fr: "Suivre la posologie prescrite" },
-    checkInteractions: { en: "Check for drug interactions", hi: "दवाओं के इंटरैक्शन की जांच करें", te: "ఔషధ పరస్పర చర్యల కోసం తనిఖీ చేయండి", ta: "மருந்து இடைவினைகளை சரிபார்க்கவும்", bn: "ওষুধের মিথস্ক্রিয়া পরীক্ষা করুন", ml: "മരുന്നുകളുടെ ഇടപെടലുകൾ പരിശോധിക്കുക", kn: "ಔಷಧದ ಪರಸ್ಪರ ಕ್ರಿಯೆಗಳನ್ನು ಪರಿಶೀಲಿಸಿ", mr: "औषधांच्या परस्परसंवादासाठी तपासा", gu: "દવાની ક્રિયાપ્રતિક્રિયાઓ માટે તપાસો", es: "Verifique las interacciones entre medicamentos", fr: "Vérifier les interactions médicamenteuses" },
-    avoidAlcohol: { en: "Avoid alcohol with meds", hi: "दवाओं के साथ शराब से बचें", te: "మందులతో మద్యపానం మానుకోండి", ta: "மருந்துகளுடன் மது அருந்துவதைத் தவிர்க்கவும்", bn: "ওষুধের সাথে অ্যালকোহল এড়িয়ে চলুন", ml: "മരുന്നുകൾക്കൊപ്പം മദ്യം ഒഴിവാക്കുക", kn: "ಔಷಧಿಗಳೊಂದಿಗೆ ಮದ್ಯಪಾನವನ್ನು ತಪ್ಪಿಸಿ", mr: "औषधांसोबत मद्यपान टाळा", gu: "દવાઓ સાથે આલ્કોહોલ ટાળો", es: "Evite el alcohol con los medicamentos", fr: "Éviter l'alcool avec les médicaments" },
+    neverShare: { en: "Never share your prescriptions.", hi: "अपने पर्चे कभी साझा न करें।", te: "మీ ప్రిస్క్రిప్షన్లను ఎప్పుడూ పంచుకోవద్దు.", ta: "உங்கள் மருந்து சீட்டுகளை ஒருபோதும் பகிர வேண்டாம்.", bn: "কখনই আপনার প্রেসক্রিপশন শেয়ার করবেন আসতে না।", ml: "നിങ്ങളുടെ കുറിപ്പടികൾ ഒരിക്കലും പങ്കിടരുത്.", kn: "ನಿಮ್ಮ ಪ್ರಿಸ್ಕ್ರಿಪ್ಷನ್‌ಗಳನ್ನು ಎಂದಿಗೂ ಹಂಚಿಕೊಳ್ಳಬೇಡಿ.", mr: "तुमची प्रिस्क्रिप्शन कधीही शेअर करू नका.", gu: "તમારી પ્રિસ્ક્રિપ્શન ક્યારેય શેર કરશો નહીં.", es: "Nunca comparta sus recetas.", fr: "Ne partagez jamais vos ordonnances." },
+    followDosage: { en: "Follow prescribed dosage", hi: "निर्धारित खुराक का पालन करें", te: "సూచించిన మోతాదును అనుసరించండి", ta: "பரிந்துரைக்கப்பட்ட அளவைப் பின்பற்றவும்", bn: "নির্ধারিত ডোজ অনুসরণ করুন", ml: "നിർദ്ദേശിച്ച ഡോസ് പിന്തുടരുക", kn: "ಸೂಚಿಸಲಾದ ಡೋಸೇಜ್ ಅನುಸರಿಸಿ", mr: "विहित डोसचे पालन करा", gu: "નિર્ધારિત ડોઝને અનુસરો", es: "Siga la dosis prescrita", fr: "Suivre la posologie prescrite" },
+    checkInteractions: { en: "Check for drug interactions", hi: "दवाओं के इंटरैक्शन की जांच करें", te: "ఔషధ పరస్పర చర్యల కోసం తనిఖీ చేయండి", ta: "மருந்து இடைவினைகளைச் சரிபார்க்கவும்", bn: "ঔষধের মিথস্ক্রিয়া পরীক্ষা করুন", ml: "മരുന്നുകളുടെ ഇടപെടലുകൾ പരിശോധിക്കുക", kn: "ಔಷಧದ ಪರಸ್ಪರ ಕ್ರಿಯೆಗಳನ್ನು ಪರಿಶೀಲಿಸಿ", mr: "औषधांच्या परस्परसंवादासाठी तपासा", gu: "દવાની ક્રિયાપ્રતિક્રિયાઓ માટે તપાસો", es: "Verifique las interacciones entre medicamentos", fr: "Vérifier les interactions médicamenteuses" },
+    avoidAlcohol: { en: "Avoid alcohol with meds", hi: "दवाओं के साथ शराब से बचें", te: "మందులతో మద్యపానం మానుకోండి", ta: "மருந்துகளுடன் மது அருந்துவதைத் தவிர்க்கவும்", bn: "ঔষধের সাথে অ্যালকোহল এড়িয়ে চলুন", ml: "മരുന്നുകൾക്കൊപ്പം മദ്യം ഒഴിവാക്കുക", kn: "ಔಷಧಿಗಳೊಂದಿಗೆ ಮದ್ಯಪಾನವನ್ನು ತಪ್ಪಿಸಿ", mr: "औषधांसोबत मद्यपान टाळा", gu: "દવાઓ સાથે આલ્કોહોલ ટાળો", es: "Evite el alcohol con los medicamentos", fr: "Éviter l'alcool avec les médicaments" },
 
     // Pediatric Care
-    weightBased: { en: "Use weight-based dosing", hi: "वजन आधारित खुराक का प्रयोग करें", te: "బరువు ఆధారిత మోతాదును ఉపయోగించండి", ta: "எடை அடிப்படையிலான அளவை பயன்படுத்தவும்", bn: "ওজন ভিত্তিক ডোজিং ব্যবহার করুন", ml: "ഭാരം അടിസ്ഥാനമാക്കിയുള്ള ഡോസ് ഉപയോഗിക്കുക", kn: "ತೂಕ ಆಧಾರಿತ ಡೋಸಿಂಗ್ ಬಳಸಿ", mr: "वजन-आधारित डोस वापरा", gu: "વજન-આધારિત ડોઝિંગનો ઉપયોગ કરો", es: "Use dosis basadas en el peso", fr: "Utiliser une posologie basée sur le poids" },
+    weightBased: { en: "Use weight-based dosing", hi: "वजन आधारित खुराक का प्रयोग करें", te: "బరువు ఆధారిత మోతాదును ఉపయోగించండి", ta: "எடை அடிப்படையிலான அளவைப் பயன்படுத்தவும்", bn: "ওজন ভিত্তিক ডোজিং ব্যবহার করুন", ml: "ഭാരം അടിസ്ഥാനമാക്കിയുള്ള ഡോസ് ഉപയോഗിക്കുക", kn: "ತೂಕ ಆಧಾರಿತ ಡೋಸಿಂಗ್ ಬಳಸಿ", mr: "वजन-आधारित डोस वापरा", gu: "વજન-આધારિત ડોઝિંગનો ઉપયોગ કરો", es: "Use dosis basadas en el peso", fr: "Utiliser une posologie basée sur le poids" },
     measuringTools: { en: "Use provided measuring tools", hi: "प्रदान किए गए मापने वाले उपकरणों का उपयोग करें", te: "అందించిన కొలిచే సాధనాలను ఉపయోగించండి", ta: "வழங்கப்பட்ட அளவீட்டு கருவிகளைப் பயன்படுத்தவும்", bn: "প্রদত্ত পরিমাপ সরঞ্জাম ব্যবহার করুন", ml: "നൽകിയിട്ടുള്ള അളക്കുന്ന ഉപകരണങ്ങൾ ഉപയോഗിക്കുക", kn: "ಒದಗಿಸಿದ ಅಳತೆ ಸಾಧನಗಳನ್ನು ಬಳಸಿ", mr: "प्रदान केलेली मोजमाप साधने वापरा", gu: "પૂરા પાડવામાં આવેલ માપન સાધનોનો ઉપયોગ કરો", es: "Use las herramientas de medición provistas", fr: "Utiliser les outils de mesure fournis" },
-    keepOutReach: { en: "Keep out of reach", hi: "पहुंच से दूर रखें", te: "అందుబాటులో లేకుండా ఉంచండి", ta: "எட்டாதவாறு வைக்கவும்", bn: "নাগালের বাইরে রাখুন", ml: "കൈയെത്താത്ത ദൂരത്ത് സൂക്ഷിക്കുക", kn: "ಕೈಗೆಟುಕದಂತೆ ಇಡಿ", mr: "आवाक्याबाहेर ठेवा", gu: "પહોંચથી દૂર રાખો", es: "Mantener fuera del alcance", fr: "Tenir hors de portée" }
+    aiAnalysisInProgress: { en: "Analyzing safety data...", hi: "सुरक्षा डेटा का विश्लेषण किया जा रहा है...", te: "భద్రతా డేటాను విశ్లేషిస్తోంది...", ta: "பாதுகாப்பு தரவை பகுப்பாய்வு செய்கிறது...", bn: "নিরাপত্তা ডেটা বিশ্লেষণ করা হচ্ছে...", ml: "സുരക്ഷാ ഡാറ്റ വിശകലനം ചെയ്യുന്നു...", kn: "ಸುರಕ್ಷತಾ ಡೇಟಾವನ್ನು ವಿಶ್ಲೇಷಿಸಲಾಗುತ್ತಿದೆ...", mr: "सुरक्षा डेटाचे विश्लेषण करत आहे...", gu: "સુરક્ષા ડેટાનું વિશ્લેષણ કરી રહ્યું છે...", es: "Analizando datos de seguridad...", fr: "Analyse des données de sécurité..." },
+    unverifiedData: { en: "Unable to retrieve specific safety data at this moment. Please consult a healthcare professional.", hi: "इस समय विशिष्ट सुरक्षा डेटा प्राप्त करने में असमर्थ। कृपया स्वास्थ्य देखभाल पेशेवर से परामर्श लें।", te: "ఈ సమయంలో నిర్దిష్ట భద్రతా డేటాను తిరిగి పొందలేకపోయాము. దయచేసి ఆరోగ్య సంరక్షణ నిపుణుడిని సంప్రదించండి.", ta: "தற்போது குறிப்பிட்ட பாதுகாப்பு தரவை மீட்டெடுக்க முடியவில்லை. தயவுசெய்து சுகாதார நிபுணரை அணுகவும்.", bn: "এই মুহূর্তে নির্দিষ্ট নিরাপত্তা ডেটা পুনরুদ্ধার করতে অক্ষম। অনুগ্রহ করে একজন স্বাস্থ্যসেবা পেশাদারের সাথে পরামর্শ করুন।", ml: "നിലവിൽ സുരക്ഷാ ഡാറ്റ ലഭ്യമല്ല. ദയവായി ഒരു ഡോക്ടറെ സമീപിക്കുക.", kn: "ಈ ಸಮಯದಲ್ಲಿ ನಿರ್ದಿಷ್ಟ ಸುರಕ್ಷತಾ ಡೇಟಾವನ್ನು ಹಿಂಪಡೆಯಲು ಸಾಧ್ಯವಿಲ್ಲ. ದಯವಿಟ್ಟು ಆರೋಗ್ಯ ವೃತ್ತಿಪರರನ್ನು ಸಂಪರ್ಕಿಸಿ.", mr: "या क्षणी विशिष्ट सुरक्षा डेटा पुनर्प्राप्त करण्यात अक्षम. कृपया आरोग्य सेवा व्यावसायिकांचा सल्ला घ्या.", gu: "આ સમયે ચોક્કસ સુરક્ષા ડેટા પ્રાપ્ત કરવામાં અસમર્થ. કૃપા કરીને આરોગ્ય સંભાળ વ્યવસાયીની સલાહ લો.", es: "No se pueden recuperar datos de seguridad específicos en este momento. Consulte a un profesional.", fr: "Impossible de récupérer des données de sécurité spécifiques. Veuillez consulter un professionnel." }
   };
+
   return mapping[key]?.[lang] || mapping[key]?.['en'] || key;
 };
 
@@ -78,9 +83,9 @@ export default function MedicationSection({ userTier, onConsultAI, onNavigate, l
     saveToRecent(searchTerm);
 
     // Dynamic check using AI
-    setSearchResult({ name: searchTerm, type: 'analyzing', info: 'Analyzing safety data...' });
+    setSearchResult({ name: searchTerm, type: 'analyzing', info: getMedTranslation("aiAnalysisInProgress", language) });
       try {
-        const aiResult = await gemini.checkMedicationSafety(searchTerm);
+        const aiResult = await gemini.checkMedicationSafety(searchTerm, language);
         if (aiResult && (aiResult.info || aiResult.reason)) {
           setSearchResult({ ...aiResult, name: searchTerm });
           showSuccess("AI Analysis Ready", `Safety report generated for ${searchTerm}.`);
@@ -93,22 +98,28 @@ export default function MedicationSection({ userTier, onConsultAI, onNavigate, l
         setSearchResult({ 
           name: searchTerm, 
           type: 'unknown', 
-          info: 'Unable to retrieve specific safety data at this moment. Please consult a healthcare professional or try the AI Chat for a general report.' 
+          info: getMedTranslation("unverifiedData", language)
         });
       }
   };
 
+  React.useEffect(() => {
+    if (searchResult && searchResult.name && searchResult.type !== 'analyzing') {
+      handleSearch();
+    }
+  }, [language]); // eslint-disable-line react-hooks/exhaustive-deps
+
   const handleConsultAI = (medName: string) => {
     if (onConsultAI) {
-      let message = '';
+            let message = '';
       if (language === 'hi') {
-        message = `मैं ${medName} की सुरक्षा और दुष्प्रभावों के बारे में जानना चाहता हूँ। क्या इसका भारत में उपयोग करना सुरक्षित है?`;
+        message = `मैं ${medName} की सुरक्षा और दुष्प्रभावों के बारे में जानना चाहता हूं। क्या इसका भारत में उपयोग करना सुरक्षित है?`;
       } else if (language === 'te') {
-        message = `నేను ${medName} యొక్క భద్రత మరియు దుష్ప్రభావాల గురించి తెలుసుకోవాలనుకుంటున్నాను. భారతదేశంలో దీనిని ఉపయోగించడం సురక్షితమేనా?`;
+        message = `నేను ${medName} యొక్క భద్రతా మరియు దుష్ప్రభావాల గురించి తెలుసుకోవాలనుకుంటున్నాను. భారతదేశంలో దీన్ని ఉపయోగించడం సురక్షితమేనా?`;
       } else if (language === 'ta') {
         message = `நான் ${medName} இன் பாதுகாப்பு மற்றும் பக்கவிளைவுகள் பற்றி அறிய விரும்புகிறேன். இந்தியாவில் இதைப் பயன்படுத்துவது பாதுகாப்பானதா?`;
       } else if (language === 'bn') {
-        message = `আমি ${medName}-এর নিরাপত্তা এবং পার্শ্বপ্রতিক্রিয়া সম্পর্কে জানতে চাই। ভারতে কি এটি ব্যবহার করা নিরাপদ?`;
+        message = `আমি ${medName} এর নিরাপত্তা এবং পার্শ্বপ্রতিক্রিয়া সম্পর্কে জানতে চাই। ভারতে এটি ব্যবহার করা কি নিরাপদ?`;
       } else if (language === 'ml') {
         message = `${medName}-ന്റെ സുരക്ഷയെക്കുറിച്ചും പാർശ്വഫലങ്ങളെക്കുറിച്ചും അറിയാൻ ഞാൻ ആഗ്രഹിക്കുന്നു. ഇന്ത്യയിൽ ഇത് ഉപയോഗിക്കുന്നത് സുരക്ഷിതമാണോ?`;
       } else if (language === 'kn') {
@@ -167,7 +178,7 @@ export default function MedicationSection({ userTier, onConsultAI, onNavigate, l
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-              placeholder="Medication name..." 
+              placeholder={getMedTranslation('searchPlaceholder', language)} 
               className="w-full pl-12 sm:pl-16 pr-32 sm:pr-40 py-4 sm:py-6 bg-white/5 border border-white/10 rounded-2xl sm:rounded-[2rem] focus:outline-none focus:ring-4 focus:ring-brand-500/20 focus:border-brand-500 transition-all text-white text-base sm:text-lg font-medium placeholder:text-slate-500"
             />
             <button 
@@ -175,7 +186,7 @@ export default function MedicationSection({ userTier, onConsultAI, onNavigate, l
               disabled={!searchTerm}
               className="absolute right-2 sm:right-3 top-2 sm:top-3 bottom-2 sm:bottom-3 px-4 sm:px-8 bg-brand-600 text-white rounded-xl sm:rounded-[1.5rem] text-xs sm:text-base font-bold hover:bg-brand-700 disabled:opacity-30 transition-all flex items-center justify-center gap-2 shadow-lg shadow-brand-500/20 shadow-sm"
             >
-              Check
+              {getMedTranslation('checkButton', language)}
               <ChevronRight size={18} className="sm:w-[20px] sm:h-[20px]" />
             </button>
           </div>
@@ -230,17 +241,17 @@ export default function MedicationSection({ userTier, onConsultAI, onNavigate, l
                   {searchResult.type === 'analyzing' ? (
                     <div className="flex items-center gap-3 text-brand-600">
                       <Loader2 className="animate-spin" size={16} />
-                      <span className="text-[10px] sm:text-sm font-bold animate-pulse uppercase tracking-widest">AI analysis in progress...</span>
+                      <span className="text-[10px] sm:text-sm font-bold animate-pulse uppercase tracking-widest">{getMedTranslation("aiAnalysisInProgress", language)}</span>
                     </div>
                   ) : (
                     <div className="flex flex-col gap-2">
                       <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
                         {searchResult.type === 'banned' ? (
-                          <span className="text-rose-600 font-bold uppercase tracking-tight">BANNED IN INDIA</span>
+                          <span className="text-rose-600 font-bold uppercase tracking-tight">{getMedTranslation("bannedInIndia", language)}</span>
                         ) : searchResult.type === 'restricted' ? (
-                          <span className="text-orange-600 font-bold uppercase tracking-tight">RESTRICTED MEDICATION</span>
+                          <span className="text-orange-600 font-bold uppercase tracking-tight">{getMedTranslation("restrictedMedication", language)}</span>
                         ) : searchResult.type === 'unknown' ? (
-                          <span className="text-amber-600 font-bold uppercase tracking-tight">UNVERIFIED DATA</span>
+                          <span className="text-amber-600 font-bold uppercase tracking-tight">{getMedTranslation("unverifiedData", language)}</span>
                         ) : null}
                       </p>
                       <p className="text-xs sm:text-sm text-slate-600 leading-relaxed font-medium">
@@ -255,7 +266,7 @@ export default function MedicationSection({ userTier, onConsultAI, onNavigate, l
                     onClick={() => handleConsultAI(searchResult.name)}
                     className="flex-1 py-3.5 sm:py-4 bg-brand-600 text-white rounded-xl text-sm font-bold hover:bg-brand-700 transition-all flex items-center justify-center gap-2 shadow-sm"
                   >
-                    Deep AI Report
+                    {getMedTranslation("deepAiReport", language)}
                     <ChevronRight size={16} />
                   </button>
                   <button 
@@ -371,3 +382,4 @@ export default function MedicationSection({ userTier, onConsultAI, onNavigate, l
     </div>
   );
 }
+

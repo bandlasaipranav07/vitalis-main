@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { GoogleGenAI } from "@google/genai";
-import { LocalClinicalEngine } from "../_lib/local-clinical-engine.js";
+import { LocalClinicalEngine } from "../_lib/local-clinical-engine";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const DEFAULT_MODEL = "gemini-2.5-flash";

@@ -268,7 +268,7 @@ function AppContent() {
       case 'general-health':
         return <GeneralHealth />;
       case 'legal-resources':
-        return <LegalResources />;
+        return <LegalResources language={selectedLanguage} />;
       case 'trust-privacy':
         return <TrustPrivacyDashboard />;
       case 'help':
@@ -312,7 +312,7 @@ function AppContent() {
 
   // Authenticated/Guest View
   return (
-    <div className="min-h-screen flex flex-col bg-brand-50">
+    <div className="h-screen flex flex-col bg-brand-50 overflow-hidden">
       {/* Navigation */}
       <nav className="h-16 bg-white/80 backdrop-blur-md border-b border-brand-100 px-4 sm:px-8 flex items-center justify-between sticky top-0 z-50">
         <div className="flex items-center gap-4 sm:gap-10">

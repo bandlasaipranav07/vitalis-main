@@ -29,7 +29,7 @@ const ai = new GoogleGenAI({
   }
 });
 
-const DEFAULT_MODEL = "gemini-flash-latest";
+const DEFAULT_MODEL = "gemini-2.5-flash";
 const TTS_MODEL = "gemini-3.1-flash-tts-preview";
 
 // API Routes
@@ -123,7 +123,8 @@ app.post("/api/gemini/analyze", async (req, res) => {
         // Extract medication name
         const medMatch = prompt.match(/"([^"]+)"/) || prompt.match(/medication:\s*"([^"]+)"/) || prompt.match(/medication:\s*([a-zA-Z0-9\s-]+)/i);
         const medName = medMatch ? medMatch[1] : "Unknown medication";
-        const fallback = LocalClinicalEngine.generateMedicationSafety(medName);
+        const language = req.body.language || "en";
+        const fallback = LocalClinicalEngine.generateMedicationSafety(medName, language);
         res.json(fallback);
       } else {
         // Assume symptom checker
@@ -143,7 +144,7 @@ app.post("/api/gemini/analyze", async (req, res) => {
 });
 
 app.post("/api/gemini/multimodal", async (req, res) => {
-  const { history, parts, systemInstruction, model = DEFAULT_MODEL } = req.body;
+  const { history, parts, systemInstruction, model = DEFAULT_MODEL, language = "en" } = req.body;
   try {
     res.setHeader('Content-Type', 'text/event-stream');
     res.setHeader('Cache-Control', 'no-cache');
@@ -187,7 +188,7 @@ app.post("/api/gemini/multimodal", async (req, res) => {
         if (textPart) promptText = textPart.text;
       }
       
-      const fallbackResponse = await LocalClinicalEngine.generateChatResponse([promptText], "en");
+      const fallbackResponse = await LocalClinicalEngine.generateChatResponse([promptText], language);
       res.write(`data: ${JSON.stringify({ text: fallbackResponse })}\n\n`);
       res.write('data: [DONE]\n\n');
       res.end();

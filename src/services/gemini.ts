@@ -394,11 +394,12 @@ If the uploaded report is blurry, corrupted, incomplete, or unreadable, respond 
   /**
    * Generates a structured summary for a real doctor
    */
-  async generateClinicalSummary(messages: Message[]): Promise<any> {
+  async generateClinicalSummary(messages: Message[], language: Language = 'en'): Promise<any> {
     try {
+      const langName = SUPPORTED_LANGUAGES.find(l => l.code === language)?.name || 'English';
       const chatLog = messages.map(m => `${m.role.toUpperCase()}: ${m.text}`).join("\n");
-      const prompt = `Generate a high-fidelity clinical summary for a healthcare professional. Focus on objective facts, symptoms, and duration.\n\nInteraction History:\n${chatLog}`;
-      const systemInstruction = "You are a professional clinical scribe. Output a structured JSON summary representing the case presentation.";
+      const prompt = `Generate a high-fidelity clinical summary for a healthcare professional. Focus on objective facts, symptoms, and duration. All text fields in the output JSON schema MUST be written in the ${langName} language.\n\nInteraction History:\n${chatLog}`;
+      const systemInstruction = `You are a professional clinical scribe. Output a structured JSON summary representing the case presentation. All text fields in the output JSON schema MUST be written in the ${langName} language.`;
       
       const responseSchema = {
         type: "OBJECT",
@@ -416,7 +417,7 @@ If the uploaded report is blurry, corrupted, incomplete, or unreadable, respond 
       const response = await fetch("/api/gemini/analyze", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ prompt, systemInstruction, responseSchema })
+        body: JSON.stringify({ prompt, systemInstruction, responseSchema, language })
       });
 
       if (!response.ok) throw new Error(`Server error: ${response.statusText}`);
@@ -436,7 +437,7 @@ If the uploaded report is blurry, corrupted, incomplete, or unreadable, respond 
   /**
    * Dynamic medication safety check
    */
-  async checkMedicationSafety(medicationName: string) {
+  async checkMedicationSafety(medicationName: string, language: string = 'en') {
     try {
       const prompt = `You are a medicine safety and prescription analysis AI assistant.
 
@@ -457,7 +458,9 @@ If medicine information is unclear or unverified, map to "unknown" type and resp
 “I cannot confidently verify this medicine information. Please consult a licensed healthcare professional or pharmacist.”
 
 Analyze this medication: "${medicationName}".
-Determine if it is BANNED, RESTRICTED, or COMMON. provide the specific reason if banned.`;
+Determine if it is BANNED, RESTRICTED, or COMMON. provide the specific reason if banned.
+
+CRITICAL INSTRUCTION: You MUST translate the "info" and "reason" fields into the language corresponding to ISO code: "${language}".`;
 
       const systemInstruction = SYSTEM_INSTRUCTION + "\n\nOutput strictly JSON. Use search tool to verify if unsure.";
       
@@ -482,7 +485,7 @@ Determine if it is BANNED, RESTRICTED, or COMMON. provide the specific reason if
     } catch (error) {
       console.error("Medication Safety Check Error:", error);
       try {
-        return LocalClinicalEngine.generateMedicationSafety(medicationName);
+        return LocalClinicalEngine.generateMedicationSafety(medicationName, language);
       } catch (err) {
         console.warn("Client fallback medication safety check failed:", err);
         throw error;
@@ -535,6 +538,11 @@ Determine if it is BANNED, RESTRICTED, or COMMON. provide the specific reason if
     const isTamil = language === 'ta';
     const isMalayalam = language === 'ml';
     const isKannada = language === 'kn';
+    const isBengali = language === 'bn';
+    const isMarathi = language === 'mr';
+    const isGujarati = language === 'gu';
+    const isSpanish = language === 'es';
+    const isFrench = language === 'fr';
 
     if (isHindi) {
       return {
@@ -555,7 +563,7 @@ Determine if it is BANNED, RESTRICTED, or COMMON. provide the specific reason if
         recommendations: ["ఖచ్చితమైన నిర్ధారణ కోసం దయచేసి ఆరోగ్య నిపుణుడిని సంప్రదించండి."],
         warningSigns: [],
         suggestedSpecialist: "జనరల్ ఫిజీషియన్",
-        disclaimer: "ఇది ప్రత్యామ్నాయ సమాధానం. దయచేసి వైద్యుడిని సంప్రదించండి."
+        disclaimer: "ఇది ప్రత్యామ్നాయ సమాధానం. దయచేసి వైద్యుడిని సంప్రదించండి."
       };
     }
     if (isTamil) {
@@ -589,6 +597,61 @@ Determine if it is BANNED, RESTRICTED, or COMMON. provide the specific reason if
         warningSigns: [],
         suggestedSpecialist: "ಸಾಮಾನ್ಯ ವೈದ್ಯರು",
         disclaimer: "ಇದು ಪರ್ಯಾಯ ಪ್ರತಿಕ್ರಿಯೆಯಾಗಿದೆ. ದಯವಿಟ್ಟು ವೈದ್ಯರನ್ನು ಸಂಪರ್ಕಿಸಿ."
+      };
+    }
+    if (isBengali) {
+      return {
+        healthSummary: "পরামর্শের সুপারিশ করা হচ্ছে",
+        possibleCauses: ["আমি এই বিষয়ে অভিজ্ঞ নই। অনুগ্রহ করে একজন চিকিৎসা পেশাদারের সাথে পরামর্শ করার চেষ্টা করুন।"],
+        riskLevel: "Moderate",
+        recommendations: ["সঠিক রোগ নির্ণয়ের জন্য অনুগ্রহ করে একজন স্বাস্থ্য পেশাদারের সাথে পরামর্শ করুন।"],
+        warningSigns: [],
+        suggestedSpecialist: "সাধারণ চিকিৎসক",
+        disclaimer: "এটি একটি ফলব্যাক প্রতিক্রিয়া। অনুগ্রহ করে ডাক্তারের সাথে পরামর্শ করুন।"
+      };
+    }
+    if (isMarathi) {
+      return {
+        healthSummary: "सल्ला घेण्याची शिफारस केली जाते",
+        possibleCauses: ["मला या क्षेत्रातील ज्ञान नाही. कृपया वैद्यकीय व्यावसायिकाचा सल्ला घेण्याचा प्रयत्न करा।"],
+        riskLevel: "Moderate",
+        recommendations: ["अचूक निदानासाठी कृपया आरोग्य सेवा व्यावसायिकांचा सल्ला घ्या।"],
+        warningSigns: [],
+        suggestedSpecialist: "सामान्य चिकित्सक",
+        disclaimer: "हा एक फॉलबॅक प्रतिसाद आहे. कृपया डॉक्टरांचा सल्ला घ्या।"
+      };
+    }
+    if (isGujarati) {
+      return {
+        healthSummary: "સલાહ લેવાની ભલામણ કરવામાં આવે છે",
+        possibleCauses: ["મને આ ક્ષેત્રમાં જ્ઞાન નથી. કૃપા કરીને તબીબી વ્યાવસાયિકની સલાહ લેવા પ્રયાસ કરો."],
+        riskLevel: "Moderate",
+        recommendations: ["ચોક્કસ નિદાન માટે કૃપા કરીને આરોગ્ય વ્યાવસાયિકની સલાહ લો."],
+        warningSigns: [],
+        suggestedSpecialist: "સામાન્ય ચિકિત્સક",
+        disclaimer: "આ એક ફૉલબેક પ્રતિસાદ છે. કૃપા કરીને ડૉક્ટરની સલાહ લો."
+      };
+    }
+    if (isSpanish) {
+      return {
+        healthSummary: "Consulta Recomendada",
+        possibleCauses: ["No tengo conocimientos en esta área. Por favor, intente consultar a un profesional médico."],
+        riskLevel: "Moderate",
+        recommendations: ["Consulte a un profesional de la salud para obtener un diagnóstico preciso."],
+        warningSigns: [],
+        suggestedSpecialist: "Médico General",
+        disclaimer: "Esta es una respuesta de respaldo. Consulte a un médico."
+      };
+    }
+    if (isFrench) {
+      return {
+        healthSummary: "Consultation Recommandée",
+        possibleCauses: ["Je ne suis pas compétent dans ce domaine. Veuillez essayer de consulter un professionnel de la santé."],
+        riskLevel: "Moderate",
+        recommendations: ["Veuillez consulter un professionnel de la santé pour un diagnostic précis."],
+        warningSigns: [],
+        suggestedSpecialist: "Médecin Généraliste",
+        disclaimer: "Il s'agit d'une réponse de secours. Veuillez consulter un médecin."
       };
     }
 

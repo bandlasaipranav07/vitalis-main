@@ -1,6 +1,6 @@
 import type { VercelRequest, VercelResponse } from "@vercel/node";
 import { GoogleGenAI } from "@google/genai";
-import { LocalClinicalEngine } from "../_lib/local-clinical-engine.js";
+import { LocalClinicalEngine } from "../_lib/local-clinical-engine";
 
 const ai = new GoogleGenAI({ apiKey: process.env.GEMINI_API_KEY });
 const DEFAULT_MODEL = "gemini-2.5-flash";
@@ -44,7 +44,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           prompt.match(/medication:\s*"([^"]+)"/) ||
           prompt.match(/medication:\s*([a-zA-Z0-9\s-]+)/i);
         const medName = medMatch ? medMatch[1] : "Unknown medication";
-        const fallback = LocalClinicalEngine.generateMedicationSafety(medName);
+        const fallback = LocalClinicalEngine.generateMedicationSafety(medName, language);
         return res.json(fallback);
       } else {
         const severity = req.body.severity || "Moderate";

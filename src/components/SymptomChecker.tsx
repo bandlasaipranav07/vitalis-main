@@ -3,7 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Stethoscope, Search, ChevronRight, AlertCircle, AlertTriangle, CheckCircle2, Plus, X, Activity, Thermometer, Clock, Loader2, Info, User, RotateCcw, FileText, Crown } from 'lucide-react';
 import { cn } from '../utils';
 import { gemini } from '../services/gemini';
-import { UserTier, Language } from '../types';
+import { UserTier, Language, SUPPORTED_LANGUAGES } from '../types';
 import { getTranslations } from '../translations';
 import { useToast } from '../contexts/ToastContext';
 
@@ -122,7 +122,67 @@ interface AnalysisResult {
   guidance?: string;
 }
 
-const getStep3Text = (key: string, lang: Language) => {
+const getStep3TextExtended = (key: string, lang: Language) => {
+  const extra: Record<string, Record<string, string>> = {
+    readyToShowDoctor: {
+      es: "Listo para mostrar a su médico",
+      fr: "Prêt à présenter à votre médecin",
+      mr: "तुमच्या डॉक्टरांना दाखवण्यासाठी तयार",
+      gu: "તમારા ડૉક્ટરને બતાવવા માટે તૈયાર"
+    },
+    presentation: {
+      es: "Presentación",
+      fr: "Présentation",
+      mr: "सादरीकरण",
+      gu: "પ્રસ્તુતિ"
+    },
+    triageCategory: {
+      es: "Categoría de Triaje",
+      fr: "Catégorie de Triage",
+      mr: "ट्रायज श्रेणी",
+      gu: "ટ્રાયેજ કેટેગરી"
+    },
+    reportedSymptoms: {
+      es: "Síntomas Reportados",
+      fr: "Symptômes Signalés",
+      mr: "नोंदवलेली लक्षणे",
+      gu: "નોંધાયેલા લક્ષણો"
+    },
+    keyConcernsAnalysis: {
+      es: "Principales Preocupaciones y Análisis Diferencial",
+      fr: "Préoccupations Majeures & Analyse Différentielle",
+      mr: "मुख्य चिंता आणि विभेदक विश्लेषण",
+      gu: "મુખ્ય ચિંતાઓ आणि વિભેદક વિશ્લેષણ"
+    },
+    suggestedQuestions: {
+      es: "Preguntas Sugeridas para su Médico",
+      fr: "Questions Suggérées pour votre Médecin",
+      mr: "तुमच्या डॉक्टरांसाठी सुचवलेले प्रश्न",
+      gu: "તમારા ડૉક્ટર માટે સૂચવેલા પ્રશ્નો"
+    },
+    printExportPdf: {
+      es: "Imprimir / Exportar PDF",
+      fr: "Imprimer / Exporter en PDF",
+      mr: "प्रिंट / पीडीएफ एक्सपोर्ट करा",
+      gu: "પ્રિન્ટ / પીડીએફ નિકાસ કરો"
+    },
+    close: {
+      es: "Cerrar",
+      fr: "Fermer",
+      mr: "बंद करा",
+      gu: "બંધ કરો"
+    },
+    toolDisclaimer: {
+      es: "Descargo de responsabilidad: Esta herramienta es solo para fines informativos. No proporciona un diagnóstico médico ni reemplaza el consejo profesional.",
+      fr: "Clause de non-responsabilité: Cet outil est fourni à titre informatif uniquement. Il ne fournit pas de diagnostic médical et ne remplace pas les conseils d'un professionnel.",
+      mr: "अस्वीकरण: हे साधन केवळ माहितीच्या उद्देशाने आहे. हे वैद्यकीय निदान प्रदान करत नाही किंवा व्यावसायिक सल्ल्याची जागा घेत नाही.",
+      gu: "અસ્વીકરણ: આ સાધન ફક્ત માહિતીના હેતુ માટે છે. તે તબીબી નિદાન પ્રદાન કરતું નથી અથવા વ્યાવસાયિક સલાહને બદલતું નથી."
+    }
+  };
+  return extra[key]?.[lang] || getStep3TextOriginal(key, lang);
+};
+
+const getStep3TextOriginal = (key: string, lang: Language) => {
   const mapping: Record<string, Partial<Record<Language, string>>> = {
     readyToShowDoctor: {
       en: "Ready to show your doctor",
@@ -227,6 +287,220 @@ const getStep3Text = (key: string, lang: Language) => {
   return mapping[key]?.[lang] || mapping[key]?.['en'] || key;
 };
 
+const getStep3Text = getStep3TextExtended;
+
+const getLocalizedFallback = (lang: Language): AnalysisResult => {
+  const fallbacks: Record<Language, AnalysisResult> = {
+    en: {
+      healthSummary: "Consultation Recommended",
+      possibleCauses: ["Unable to determine exact cause. We encountered an error while analyzing your symptoms."],
+      riskLevel: 'Moderate',
+      recommendations: ["Please try again or consult our AI assistant directly.", "Please consult a healthcare professional for an accurate diagnosis."],
+      warningSigns: ["If symptoms rapidly worsen, seek immediate medical care."],
+      suggestedSpecialist: "General Practitioner",
+      disclaimer: "This is an automated fallback response. Please consult a doctor."
+    },
+    hi: {
+      healthSummary: "परामर्श की सिफारिश की जाती है",
+      possibleCauses: ["सटीक कारण का निर्धारण करने में असमर्थ। आपके लक्षणों का विश्लेषण करते समय हमें एक त्रुटि का सामना करना पड़ा।"],
+      riskLevel: 'Moderate',
+      recommendations: ["कृपया पुन: प्रयास करें या सीधे हमारे एआई सहायक से परामर्श करें।", "सटीक निदान के लिए कृपया किसी स्वास्थ्य पेशेवर से परामर्श लें।"],
+      warningSigns: ["यदि लक्षण तेजी से बिगड़ते हैं, तो तत्काल चिकित्सा सहायता लें।"],
+      suggestedSpecialist: "सामान्य चिकित्सक",
+      disclaimer: "यह एक स्वचालित फ़ॉलबैक प्रतिक्रिया है। कृपया डॉक्टर से परामर्श लें।"
+    },
+    te: {
+      healthSummary: "సంప్రదింపులు సిఫార్సు చేయబడింది",
+      possibleCauses: ["ఖచ్చితమైన కారణాన్ని గుర్తించలేకపోయాము. మీ లక్షణాలను విశ్లేషించేటప్పుడు మాకు ఒక లోపం ఎదురైంది."],
+      riskLevel: 'Moderate',
+      recommendations: ["దయచేసి మళ్లీ ప్రయత్నించండి లేదా నేరుగా మా AI సహాయకుడిని సంప్రదించండి.", "ఖచ్చితమైన నిర్ధారణ కోసం దయచేసి ఆరోగ్య నిపుణుడిని సంప్రదించండి."],
+      warningSigns: ["లక్షణాలు వేగంగా క్షీణిస్తే, వెంటనే అత్యవసర వైద్య సహాయం తీసుకోండి."],
+      suggestedSpecialist: "జనరల్ ఫిజీషియన్",
+      disclaimer: "ఇది స్వయంచాలక ప్రత్యామ్నాయ ప్రతిస్పందన. దయచేసి వైద్యుడిని సంప్రదించండి."
+    },
+    ta: {
+      healthSummary: "ஆலோசனை பரிந்துரைக்கப்படுகிறது",
+      possibleCauses: ["துல்லியமான காரணத்தை தீர்மானிக்க முடியவில்லை. உங்கள் அறிகுறிகளை பகுப்பாய்வு செய்யும் போது ஒரு பிழை ஏற்பட்டது."],
+      riskLevel: 'Moderate',
+      recommendations: ["தயவுசெய்து மீண்டும் முயற்சிக்கவும் அல்லது எங்களது AI உதவியாளரை நேரடியாக அணுகவும்.", "துல்லியமான நோயறிதலுக்கு ஒரு தகுதி வாய்ந்த மருத்துவரை அணுகவும்."],
+      warningSigns: ["அறிகுறிகள் விரைவாக மோசமடைந்தால், உடனடியாக அவசர மருத்துவ உதவியை நாடவும்."],
+      suggestedSpecialist: "பொது மருத்துவர்",
+      disclaimer: "இது ஒரு தானியங்கி மாற்று பதில். தயவுசெய்து மருத்துவரை அணுகவும்."
+    },
+    bn: {
+      healthSummary: "পরামর্শের সুপারিশ করা হচ্ছে",
+      possibleCauses: ["সঠিক কারণ নির্ধারণ করতে অসমর্থ। আপনার উপসর্গ বিশ্লেষণের সময় আমরা একটি ত্রুটির সম্মুখীন হয়েছি।"],
+      riskLevel: 'Moderate',
+      recommendations: ["অনুগ্রহ করে আবার চেষ্টা করুন বা সরাসরি আমাদের এআই সহকারীর সাথে পরামর্শ করুন।", "সঠিক রোগ নির্ণয়ের জন্য অনুগ্রহ করে একজন স্বাস্থ্য পেশাদারের সাথে পরামর্শ করুন।"],
+      warningSigns: ["উপসর্গগুলি দ্রুত খারাপ হলে, অবিলম্বে জরুরি চিকিৎসা সহায়তা নিন।"],
+      suggestedSpecialist: "সাধারণ চিকিৎসক",
+      disclaimer: "এটি একটি স্বয়ংক্রিয় ফলব্যাক প্রতিক্রিয়া। অনুগ্রহ করে ডাক্তারের সাথে পরামর্শ করুন।"
+    },
+    ml: {
+      healthSummary: "ആലോചന നിർദ്ദേശിക്കുന്നു",
+      possibleCauses: ["കൃത്യമായ കാരണം കണ്ടെത്താനായില്ല. നിങ്ങളുടെ ലക്ഷണങ്ങൾ വിശകലനം ചെയ്യുമ്പോൾ ഒരു പിശക് സംഭവിച്ചു."],
+      riskLevel: 'Moderate',
+      recommendations: ["ദയവായി വീണ്ടും ശ്രമിക്കുക അല്ലെങ്കിൽ ഞങ്ങളുടെ AI സഹായിയെ നേരിട്ട് സമീപിക്കുക.", "കൃത്യമായ രോഗനിർണ്ണയത്തിന് ദയവായി ഒരു ഡോക്ടറെ സമീപിക്കുക."],
+      warningSigns: ["ലക്ഷണം അതിവേഗം വഷളാകുകയാണെങ്കിൽ, ഉടൻ തന്നെ അടിയന്തിര വൈദ്യസഹായം തേടുക്കുക."],
+      suggestedSpecialist: "ജനറൽ ഫിസിഷ്യൻ",
+      disclaimer: "ഇതൊരു ഓട്ടോമേറ്റഡ് ബദൽ പ്രതികരണമാണ്. ദയവായി ഒരു ഡോക്ടറെ സമീപിക്കുക."
+    },
+    kn: {
+      healthSummary: "ಸಮಾಲೋಚನೆ ಶಿಫಾರಸು ಮಾಡಲಾಗಿದೆ",
+      possibleCauses: ["ಖಚಿತವಾದ ಕಾರಣವನ್ನು ನಿರ್ಧರಿಸಲು ಸಾಧ್ಯವಾಗುತ್ತಿಲ್ಲ. ನಿಮ್ಮ ರೋಗಲಕ್ಷಣಗಳನ್ನು ವಿಶ್ಲೇಷಿಸುವಾಗ ನಮಗೆ ದೋಷ ಎದುರಾಗಿದೆ."],
+      riskLevel: 'Moderate',
+      recommendations: ["ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ ಅಥವಾ ನಮ್ಮ AI ಸಹಾಯಕನನ್ನು ನೇರವಾಗಿ ಸಂಪರ್ಕಿಸಿ.", "ನಿಖರವಾದ ರೋಗನಿರ್ಣಯಕ್ಕಾಗಿ ದಯವಿಟ್ಟು ಆರೋಗ್ಯ ವೃತ್ತಿಪರರನ್ನು ಸಂಪರ್ಕಿಸಿ."],
+      warningSigns: ["ರೋಗಲಕ್ಷಣಗಳು ವೇಗವಾಗಿ ಉಲ್ಬಣಗೊಂಡರೆ, ತಕ್ಷಣವೇ ತುರ್ತು ವೈದ್ಯಕೀಯ ಚಿಕಿತ್ಸೆ ಪಡೆಯಿರಿ."],
+      suggestedSpecialist: "ಸಾಮಾನ್ಯ ವೈದ್ಯರು",
+      disclaimer: "ಇದು ಸ್ವಯಂಚಾಲಿತ ಪರ್ಯಾಯ ಪ್ರತಿಕ್ರಿಯೆಯಾಗಿದೆ. ದಯವಿಟ್ಟು ವೈದ್ಯರನ್ನು ಸಂಪರ್ಕಿಸಿ."
+    },
+    mr: {
+      healthSummary: "सल्ला घेण्याची शिफारस केली जाते",
+      possibleCauses: ["मला या क्षेत्रातील ज्ञान नाही. कृपया वैद्यकीय व्यावसायिकाचा सल्ला घेण्याचा प्रयत्न करा।"],
+      riskLevel: 'Moderate',
+      recommendations: ["अचूक निदानासाठी कृपया आरोग्य सेवा व्यावसायिकांचा सल्ला घ्या।"],
+      warningSigns: ["लक्षणे वेगाने बिघडल्यास, त्वरित वैद्यकीय मदत घ्या।"],
+      suggestedSpecialist: "सामान्य चिकित्सक",
+      disclaimer: "हा एक स्वयंचलित फॉलबॅक प्रतिसाद आहे. कृपया डॉक्टरांचा सल्ला घ्या।"
+    },
+    gu: {
+      healthSummary: "સલાહ લેવાની ભલામણ કરવામાં આવે છે",
+      possibleCauses: ["મને આ ક્ષેત્રમાં જ્ઞાન નથી. કૃપા કરીને તબીબી વ્યાવસાયિકની સલાહ લેવા પ્રયાસ કરો."],
+      riskLevel: 'Moderate',
+      recommendations: ["ચોક્કસ નિદાન માટે કૃપા કરીને આરોગ્ય વ્યાવસાયિકની સલાહ લો."],
+      warningSigns: ["જો લક્ષણો ઝડપથી બગડે, તો તાત્કાલિક તબીબી સારવાર મેળવો."],
+      suggestedSpecialist: "સામાન્ય ચિકિત્સક",
+      disclaimer: "આ એક સ્વચાલિત ફૉલબેક પ્રતિસાદ છે. કૃપા કરીને ડૉક્ટરની સલાહ લો."
+    },
+    es: {
+      healthSummary: "Consulta Recomendada",
+      possibleCauses: ["No tengo conocimientos en esta área. Por favor, intente consultar a un profesional médico."],
+      riskLevel: 'Moderate',
+      recommendations: ["Por favor, intente de nuevo o consulte a nuestro asistente de IA directamente.", "Consulte a un profesional de la salud para obtener un diagnóstico preciso."],
+      warningSigns: ["Si los síntomas empeoran rápidamente, busque atención médica inmediata."],
+      suggestedSpecialist: "Médico General",
+      disclaimer: "Esta es una respuesta de respaldo automatizada. Consulte a un médico."
+    },
+    fr: {
+      healthSummary: "Consultation Recommandée",
+      possibleCauses: ["Je ne suis pas compétent dans ce domaine. Veuillez essayer de consulter un professionnel de la santé."],
+      riskLevel: 'Moderate',
+      recommendations: ["Veuillez réessayer ou consulter directement notre assistant IA.", "Veuillez consulter un professionnel de la santé pour un diagnostic précis."],
+      warningSigns: ["Si les symptômes s'aggravent rapidement, demandez une aide médicale immédiate."],
+      suggestedSpecialist: "Médecin Généraliste",
+      disclaimer: "Il s'agit d'une réponse de secours automatisée. Veuillez consulter un médecin."
+    }
+  };
+  return fallbacks[lang] || fallbacks['en'];
+};
+
+const getToastTranslations = (lang: Language) => {
+  const toasts: Record<Language, { errorTitle: string, errorDesc: string, successTitle: string, successDesc: string }> = {
+    en: {
+      errorTitle: "Analysis Error",
+      errorDesc: "Vitalis was unable to process your symptoms. Please try again or consult a doctor.",
+      successTitle: "Analysis Complete",
+      successDesc: "We've analyzed your symptoms against clinical patterns."
+    },
+    hi: {
+      errorTitle: "विश्लेषण त्रुटि",
+      errorDesc: "वाइटलिस आपके लक्षणों को संसाधित करने में असमर्थ था। कृपया पुनः प्रयास करें या डॉक्टर से परामर्श करें।",
+      successTitle: "विश्लेषण पूर्ण",
+      successDesc: "हमने नैदानिक पैटर्न के विरुद्ध आपके लक्षणों का विश्लेषण किया है।"
+    },
+    te: {
+      errorTitle: "విశ్లేషణ లోపం",
+      errorDesc: "Vitalis మీ లక్షణాలను విశ్లేషించలేకపోయింది. దయచేసి మళ్లీ ప్రయత్నించండి లేదా వైద్యుడిని సంప్రదించండి.",
+      successTitle: "విశ్లేషణ పూర్తయింది",
+      successDesc: "మేము క్లినికల్ నమూనాలకు వ్యతిరేకంగా మీ లక్షణాలను విశ్లేషించాము."
+    },
+    ta: {
+      errorTitle: "பகுப்பாய்வு பிழை",
+      errorDesc: "Vitalis உங்கள் அறிகுறிகளைச் செயலாக்க முடியவில்லை. தயவுசெய்து மீண்டும் முயற்சிக்கவும் அல்லது மருத்துவரை அணுகவும்.",
+      successTitle: "பகுப்பாய்வு முடிந்தது",
+      successDesc: "மருத்துவ வடிவங்களுக்கு எதிராக உங்கள் அறிகுறிகளை நாங்கள் பகுப்பாய்வு செய்துள்ளோம்."
+    },
+    bn: {
+      errorTitle: "বিশ্লেষণ ত্রুটি",
+      errorDesc: "Vitalis আপনার উপসর্গ প্রক্রিয়া করতে অসমর্থ হয়েছে। অনুগ্রহ করে আবার চেষ্টা করুন বা ডাক্তারের সাথে পরামর্শ করুন।",
+      successTitle: "বিশ্লেষণ সম্পূর্ণ",
+      successDesc: "আমরা ক্লিনিকাল প্যাটার্নের বিরুদ্ধে আপনার উপসর্গ বিশ্লেষণ করেছি।"
+    },
+    ml: {
+      errorTitle: "വിശകലന പിശക്",
+      errorDesc: "Vitalis-ന് നിങ്ങളുടെ ലക്ഷണങ്ങൾ പ്രോസസ്സ് ചെയ്യാൻ കഴിഞ്ഞില്ല. ദയവായി വീണ്ടും ശ്രമിക്കുക അല്ലെങ്കിൽ ഒരു ഡോക്ടറെ സമീപിക്കുക.",
+      successTitle: "വിശകലനം പൂർത്തിയായി",
+      successDesc: "ക്ലിനിക്കൽ പാറ്റേണുകൾക്കെതിരെ ഞങ്ങൾ നിങ്ങളുടെ ലക്ഷണങ്ങൾ വിശകലനം ചെയ്തിട്ടുണ്ട്."
+    },
+    kn: {
+      errorTitle: "ವಿಶ್ಲೇಷಣೆ ದೋಷ",
+      errorDesc: "ನಿಮ್ಮ ರೋಗಲಕ್ಷಣಗಳನ್ನು ಪ್ರಕ್ರಿಯೆಗೊಳಿಸಲು Vitalis ಗೆ ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ ಅಥವಾ ವೈದ್ಯರನ್ನು ಸಂಪರ್ಕಿಸಿ.",
+      successTitle: "ವಿಶ್ಲೇಷಣೆ ಪೂರ್ಣಗೊಂಡಿದೆ",
+      successDesc: "ನಾವು ಕ್ಲಿನಿಕಲ್ ಮಾದರಿಗಳ ವಿರುದ್ಧ ನಿಮ್ಮ ರೋಗಲಕ್ಷಣಗಳನ್ನು ವಿಶ್ಲೇಷಿಸಿದ್ದೇವೆ."
+    },
+    mr: {
+      errorTitle: "विश्लेषण त्रुटी",
+      errorDesc: "Vitalis तुमच्या लक्षणांवर प्रक्रिया करण्यास अक्षम होते. कृपया पुन्हा प्रयत्न करा किंवा डॉक्टरांचा सल्ला घ्या.",
+      successTitle: "विश्लेषण पूर्ण झाले",
+      successDesc: "आम्ही क्लिनिकल पॅटर्नच्या विरूद्ध तुमच्या लक्षणांचे विश्लेषण केले आहे."
+    },
+    gu: {
+      errorTitle: "વિશ્લેષણ ભૂલ",
+      errorDesc: "Vitalis તમારા લક્ષણોની પ્રક્રિયા કરવામાં અસમર્થ હતું. કૃપા કરીને ફરી પ્રયાસ કરો અથવા ડૉક્ટરની સલાહ લો.",
+      successTitle: "વિશ્લેષણ પૂર્ણ",
+      successDesc: "અમે ક્લિનિકલ પેટર્ન સામે તમારા લક્ષણોનું વિશ્લેષણ કર્યું છે."
+    },
+    es: {
+      errorTitle: "Error de Análisis",
+      errorDesc: "Vitalis no pudo procesar sus síntomas. Intente de nuevo o consulte a un médico.",
+      successTitle: "Análisis Completado",
+      successDesc: "Hemos analizado sus síntomas con patrones clínicos."
+    },
+    fr: {
+      errorTitle: "Erreur d'Analyse",
+      errorDesc: "Vitalis n'a pas pu traiter vos symptômes. Veuillez réessayer ou consulter un médecin.",
+      successTitle: "Analyse Terminée",
+      successDesc: "Nous avons analysé vos symptômes par rapport aux modèles cliniques."
+    }
+  };
+  return toasts[lang] || toasts['en'];
+};
+
+const getSummaryToastTranslations = (lang: Language) => {
+  const toasts: Record<Language, { errorTitle: string, errorDesc: string }> = {
+    en: { errorTitle: "Summary Error", errorDesc: "Failed to generate clinical summary." },
+    hi: { errorTitle: "सारांश त्रुटि", errorDesc: "नैदानिक सारांश उत्पन्न करने में विफल।" },
+    te: { errorTitle: "సారాంశం లోపం", errorDesc: "క్లినికల్ సారాంశాన్ని రూపొందించడంలో విఫలమైంది." },
+    ta: { errorTitle: "சுருக்கப் பிழை", errorDesc: "மருத்துவச் சுருக்கத்தை உருவாக்க முடியவில்லை." },
+    bn: { errorTitle: "সারসংক্ষেপ ত্রুটি", errorDesc: "ক্লিনিকাল সারসংক্ষেপ তৈরি করতে ব্যর্থ হয়েছে।" },
+    ml: { errorTitle: "സംഗ്രഹ പിശക്", errorDesc: "ക്ലിനിക്കൽ സംഗ്രഹം സൃഷ്ടിക്കുന്നതിൽ പരാജയപ്പെട്ടു." },
+    kn: { errorTitle: "ಸಾರಾಂಶ ದೋಷ", errorDesc: "ಕಲಿನಿಕಲ್ ಸಾರಾಂಶವನ್ನು ರಚಿಸಲು ವಿಫಲವಾಗಿದೆ." },
+    mr: { errorTitle: "सारांश त्रुटी", errorDesc: "क्लिनिकल सारांश तयार करण्यात अपयशी." },
+    gu: { errorTitle: "સારાંશ ભૂલ", errorDesc: "ક્લિનિકલ સારાંશ બનાવવામાં નિષ્ફળ." },
+    es: { errorTitle: "Error de Resumen", errorDesc: "No se pudo generar el resumen clínico." },
+    fr: { errorTitle: "Erreur de Synthèse", errorDesc: "Échec de la génération de la synthèse clinique." }
+  };
+  return toasts[lang] || toasts['en'];
+};
+
+const getStepTitle = (step: number, lang: Language) => {
+  const titles: Record<Language, string> = {
+    en: `Step ${step} of 3 • AI Analysis`,
+    hi: `चरण ${step}/3 • एआई विश्लेषण`,
+    te: `దశ ${step}/3 • AI విశ్లేషణ`,
+    ta: `படி ${step}/3 • எஐ பகுப்பாய்வு`,
+    bn: `ধাপ ${step}/3 • এআই বিশ্লেষণ`,
+    ml: `ഘട്ടം ${step}/3 • എഐ വിശകലനം`,
+    kn: `ಹಂತ ${step}/3 • ಎಐ ವಿಶ್ಲೇಷಣೆ`,
+    mr: `टप्पा ${step}/3 • एआय विश्लेषण`,
+    gu: `પગલું ${step}/3 • એઆઈ વિશ્લેષણ`,
+    es: `Paso ${step} de 3 • Análisis de IA`,
+    fr: `Étape ${step} sur 3 • Analyse IA`
+  };
+  return titles[lang] || titles['en'];
+};
+
+
 export default function SymptomChecker({ userTier, onConsultAI, onNavigate, language }: SymptomCheckerProps) {
   const t = getTranslations(language);
   const { showError, showSuccess } = useToast();
@@ -297,13 +571,18 @@ export default function SymptomChecker({ userTier, onConsultAI, onNavigate, lang
 
   const handleConsultAI = () => {
     if (onConsultAI && analysis) {
+      const langName = SUPPORTED_LANGUAGES.find(l => l.code === language)?.name || 'English';
+      const localizedSymptoms = selectedSymptoms.map(s => getLocalizedSymptom(s, language)).join(', ');
+      
       const message = `I've used the symptom checker. 
       Patient Info: ${age}, ${gender}.
-      Symptoms: ${selectedSymptoms.join(', ')}. 
+      Symptoms: ${localizedSymptoms}. 
       Duration: ${duration}. 
       Severity: ${severity}. 
       The initial analysis was: "${analysis.healthSummary}: ${analysis.possibleCauses.join(', ')}". 
-      Can you provide more detailed advice?`;
+      Can you provide more detailed advice?
+      
+      CRITICAL: Please respond completely in ${langName}.`;
       onConsultAI(message);
     }
   };
@@ -316,21 +595,23 @@ export default function SymptomChecker({ userTier, onConsultAI, onNavigate, lang
       Symptoms: ${selectedSymptoms.join(', ')}.
       Duration: ${duration}.
       Severity: ${severity}.
-      Analysis: ${analysis.title} - ${analysis.cause}.`;
+      Analysis: ${analysis.healthSummary} - ${analysis.possibleCauses.join(', ')}.`;
       
       const summary = await gemini.generateClinicalSummary([
         { id: 'symptom-summary-query', role: 'user', text: summaryPrompt, timestamp: Date.now() }
-      ]);
+      ], language);
       
       if (summary) {
         setClinicalSummary(summary);
         setShowSummary(true);
       } else {
-        showError("Summary Error", "Failed to generate clinical summary.");
+        const tToast = getSummaryToastTranslations(language);
+        showError(tToast.errorTitle, tToast.errorDesc);
       }
     } catch (error) {
       console.error(error);
-      showError("Summary Error", "Failed to generate clinical summary.");
+      const tToast = getSummaryToastTranslations(language);
+      showError(tToast.errorTitle, tToast.errorDesc);
     } finally {
       setIsGeneratingSummary(false);
     }
@@ -357,19 +638,13 @@ export default function SymptomChecker({ userTier, onConsultAI, onNavigate, lang
       
       setAnalysis(safeResult);
       saveToRecent(safeResult);
-      showSuccess("Analysis Complete", "We've analyzed your symptoms against clinical patterns.");
+      const tToast = getToastTranslations(language);
+      showSuccess(tToast.successTitle, tToast.successDesc);
     } catch (error: any) {
       console.error("Analysis failed:", error);
-      showError("Analysis Error", "Vitalis was unable to process your symptoms. Please try again or consult a doctor.");
-      setAnalysis({
-        healthSummary: "Analysis Error",
-        possibleCauses: ["We encountered an error while analyzing your symptoms."],
-        riskLevel: 'Moderate',
-        recommendations: ["Please try again or consult our AI assistant directly."],
-        warningSigns: ["If symptoms worsen, seek immediate medical care."],
-        suggestedSpecialist: "General Practitioner",
-        disclaimer: "This is an automated fallback response."
-      });
+      const tToast = getToastTranslations(language);
+      showError(tToast.errorTitle, tToast.errorDesc);
+      setAnalysis(getLocalizedFallback(language));
     } finally {
       setIsAnalyzing(false);
     }
@@ -386,7 +661,7 @@ export default function SymptomChecker({ userTier, onConsultAI, onNavigate, lang
           <div className="min-w-0 pr-2">
             <h2 className="font-display font-bold text-base sm:text-2xl text-slate-800 tracking-tight truncate">{t.symptomChecker}</h2>
             <p className="text-[9px] sm:text-xs text-slate-500 font-bold uppercase tracking-widest mt-0.5 truncate">
-              {language === 'hi' ? `चरण ${step}/3 • एआई विश्लेषण` : language === 'te' ? `దశ ${step}/3 • AI విశ్లేషణ` : language === 'ta' ? `படி ${step}/3 • எஐ பகுப்பாய்வு` : language === 'bn' ? `ধাপ ${step}/3 • এআই বিশ্লেষণ` : language === 'ml' ? `ഘട്ടം ${step}/3 • എഐ വിശകലനം` : language === 'kn' ? `ಹಂತ ${step}/3 • ಎಐ ವಿಶ್ಲೇಷಣೆ` : `Step ${step} of 3 • AI Analysis`}
+              {getStepTitle(step, language)}
             </p>
           </div>
         </div>

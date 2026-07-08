@@ -14,108 +14,460 @@ import {
   Info
 } from 'lucide-react';
 import { cn } from '../utils';
+import { Language } from '../types';
 
-const LEGAL_SECTIONS = [
-  {
-    id: 'cdsco-banned',
-    title: 'CDSCO Banned Drugs & Safety',
-    icon: <ShieldAlert className="text-rose-600" />,
-    description: 'Critical safety alerts on medications banned or restricted by the CDSCO (India).',
-    url: 'https://cdsco.gov.in/opencms/opencms/en/Notifications/Banned-Drugs/',
-    content: [
-      'Fixed Dose Combinations (FDCs): Over 300+ FDCs banned due to lack of therapeutic justification.',
-      'Nimesulide: Banned for pediatric use (children under 12) due to liver toxicity risks.',
-      'Analgin: Restricted use due to risk of agranulocytosis (severe white blood cell drop).',
-      'Pioglitazone: Strictly regulated; must not be used as first-line therapy for diabetes.',
-      'Dextropropoxyphene: Banned due to potential for abuse and cardiac risks.',
-      'Safety Check: Always verify the "Schedule" of the drug (H, H1, or X) on the packaging.'
-    ],
-    details: 'The Central Drugs Standard Control Organisation (CDSCO) periodically reviews the safety and efficacy of drugs. Fixed Dose Combinations (FDCs) are often banned when they are found to have no therapeutic advantage over individual drugs. Patients should look for the red line on medicine strips, which indicates "Schedule H" drugs that should only be taken under medical supervision.'
-  },
-  {
-    id: 'patient-rights',
-    title: 'Your Rights as a Patient',
-    icon: <Users className="text-brand-600" />,
-    description: 'Empowering you with the Charter of Patient Rights (NHRC & Ministry of Health).',
-    url: 'https://main.mohfw.gov.in/sites/default/files/Charter%20of%20Patient%20Rights.pdf',
-    content: [
-      'Right to Records: You have the legal right to receive your medical reports within 24 hours.',
-      'Right to Consent: No surgery or high-risk treatment can be done without your written permission.',
-      'Right to Choice: You can choose where to buy medicines or get diagnostic tests done.',
-      'Right to Privacy: Your medical condition cannot be discussed with others without your consent.',
-      'Right to Redressal: You can file complaints against hospitals for overcharging or negligence.'
-    ],
-    details: 'The Charter of Patient Rights, adopted by the Ministry of Health and Family Welfare, outlines 17 basic rights. This includes the right to a second opinion, the right to transparency in rates, and the right to non-discrimination based on HIV status, religion, or caste. Hospitals are legally bound to provide an itemized bill and cannot hold a patient or a body hostage for unpaid bills.'
-  },
-  {
-    id: 'mental-health',
-    title: 'Mental Health Rights (2017 Act)',
-    icon: <BookOpen className="text-indigo-600" />,
-    description: 'Protection and support framework for mental well-being.',
-    url: 'https://main.mohfw.gov.in/acts-rules-and-standards-health-sector/acts/mental-healthcare-act-2017',
-    content: [
-      'Right to Equality: Mental illness must be treated on par with physical illness.',
-      'Advance Directive: You can document how you want to be treated if you face a crisis later.',
-      'Nominated Rep: You can legally appoint a friend/relative to handle your medical decisions.',
-      'Suicide Decriminalization: Attempting suicide is no longer a crime; it is a call for help.',
-      'Confidentiality: Mental health records are strictly protected under law.'
-    ],
-    details: 'The Mental Healthcare Act, 2017, shifted the focus from institutionalization to community-based care. It provides the "Right to Access Mental Healthcare" funded by the government for those below the poverty line. Crucially, it prohibits the use of electroconvulsive therapy (ECT) without anesthesia and bans the use of chains or physical restraints in mental health establishments.'
-  },
-  {
-    id: 'telemedicine',
-    title: 'Tele-Consultation Rules',
-    icon: <PhoneCall className="text-emerald-600" />,
-    description: 'Legal standards for video and phone doctor visits.',
-    url: 'https://www.nmc.org.in/rules-regulations/telemedicine-practice-guidelines/',
-    content: [
-      'Identity Check: Both the doctor and patient must verify their identity at the start.',
-      'Prescription Format: Digital prescriptions must have the doctor\'s registration number.',
-      'Restricted Drugs: Doctors CANNOT prescribe habit-forming drugs (Schedule X) via video call.',
-      'Consent: Starting a consultation implies consent, but explicit consent is better.',
-      'Data Safety: Platforms must use encrypted channels to protect your health data.'
-    ],
-    details: 'Telemedicine guidelines issued by the National Medical Commission (NMC) allow doctors to provide consultations via video, audio, or text. However, doctors are prohibited from prescribing "List O" drugs (habit-forming, narcotics) through tele-consultation. All digital prescriptions must be signed and include the doctor\'s MCI/NMC registration number to be valid at pharmacies.'
-  },
-  {
-    id: 'negligence',
-    title: 'Medical Malpractice & Redressal',
-    icon: <Gavel className="text-slate-600" />,
-    description: 'How to seek justice in cases of medical errors or negligence.',
-    url: 'https://ncdrc.nic.in/',
-    content: [
-      'Consumer Protection: You are a "consumer" of health services and can sue for poor service.',
-      'State Medical Council: You can report doctors for unethical behavior or misconduct.',
-      'Compensation: Consumer courts can award financial damages for proven negligence.',
-      'Legal Aid: Free legal services are available for those who cannot afford a lawyer.',
-      'Mediation: Many disputes can be settled faster through neutral mediation boards.'
-    ],
-    details: 'Medical negligence occurs when a healthcare professional fails to provide the standard of care expected, resulting in harm. Patients can approach District, State, or National Consumer Commissions depending on the claim amount. The Supreme Court has ruled that doctors cannot be held criminally liable unless "gross negligence" is proven, but civil compensation is common for errors.'
-  },
-  {
-    id: 'schemes',
-    title: 'Financial Aid & Govt. Schemes',
-    icon: <ShieldCheck className="text-amber-600" />,
-    description: 'Accessing affordable healthcare through national initiatives.',
-    url: 'https://nha.gov.in/PM-JAY',
-    content: [
-      'PM-JAY (Ayushman Bharat): Provides ₹5 Lakh/year for secondary & tertiary hospital care.',
-      'Janaushadhi: Access to high-quality generic medicines at 50-90% lower costs.',
-      'Health ID (ABHA): A digital health record to store all your prescriptions and reports.',
-      'Maternal Benefits: Financial support for institutional deliveries (JSY scheme).',
-      'Free Diagnostics: Available at many government primary health centers.'
-    ],
-    details: 'Ayushman Bharat (PM-JAY) is the world\'s largest health insurance scheme, covering over 50 crore citizens. For those not covered, Janaushadhi Kendras provide generic versions of expensive branded drugs that are chemically identical but significantly cheaper. The ABHA ID helps in creating a longitudinal health record that can be shared across hospitals digitally.'
-  }
-];
+const getLegalTranslation = (key: string, lang: Language) => {
+  const mapping: Record<string, Partial<Record<Language, string>>> = {
+    headerFramework: { en: "Legal & Compliance Framework", hi: "कानूनी और अनुपालन ढांचा", te: "చట్టపరమైన మరియు సమ్మతి ఫ్రేమ్‌వర్క్", ta: "சட்ட மற்றும் இணக்க கட்டமைப்பு", bn: "আইনি এবং সম্মতি কাঠামো", ml: "നിയമപരവും പാലിക്കൽ ചട്ടക്കൂട്", kn: "ಕಾನೂನು ಮತ್ತು ಅನುಸರಣೆ ಚೌಕಟ್ಟು", mr: "कायदेशीर आणि अनुपालन फ्रेमवर्क", gu: "કાયદાકીય અને પાલન માળખું", es: "Marco legal y de cumplimiento", fr: "Cadre juridique et de conformité" },
+    lastVerified: { en: "Last Verified:", hi: "अंतिम सत्यापित:", te: "చివరిగా ధృవీకరించబడింది:", ta: "கடைசியாக சரிபார்க்கப்பட்டது:", bn: "সর্বশেষ যাচাইকৃত:", ml: "അവസാനം പരിശോധിച്ചത്:", kn: "ಕೊನೆಯದಾಗಿ ಪರಿಶೀಲಿಸಲಾಗಿದೆ:", mr: "शेवटची पडताळणी:", gu: "છેલ્લે ચકાસાયેલ:", es: "Última verificación:", fr: "Dernière vérification :" },
+    medicalRights: { en: "Medical Rights & ", hi: "चिकित्सा अधिकार और ", te: "వైద్య హక్కులు & ", ta: "மருத்துவ உரிமைகள் & ", bn: "চিকিৎসা अधिकार এবং ", ml: "മെഡിക്കൽ അവകാശങ്ങളും ", kn: "ವೈದ್ಯಕೀಯ ಹಕ್ಕುಗಳು ಮತ್ತು ", mr: "वैद्यकीय हक्क आणि ", gu: "તબીबी અધિકારો અને ", es: "Derechos Médicos y ", fr: "Droits médicaux et " },
+    legalResources: { en: "Legal Resources", hi: "कानूनी संसाधन", te: "చట్టపరమైన వనరులు", ta: "சட்ட வளங்கள்", bn: "আইনি সম্পদ", ml: "നിയമപരമായ വിഭവങ്ങൾ", kn: "ಕಾನೂನು ಸಂಪನ್ಮೂಲಗಳು", mr: "कायदेशीर संसाधने", gu: "કાયદાકીય સંસાધનો", es: "Recursos Legales", fr: "Ressources juridiques" },
+    stayInformed: { en: "Stay informed about your rights as a patient, government health schemes, and the legal framework governing healthcare in India.", hi: "एक रोगी के रूप में अपने अधिकारों, सरकारी स्वास्थ्य योजनाओं और भारत में स्वास्थ्य देखभाल को नियंत्रित करने वाले कानूनी ढांचे के बारे में सूचित रहें।", te: "రోగిగా మీ హక్కులు, ప్రభుత్వ ఆరోగ్య పథకాలు మరియు భారతదేశంలో ఆరోగ్య సంరక్షణను నియంత్రించే చట్టపరమైన ఫ్రేమ్‌వర్క్ గురించి సమాచారంతో ఉండండి.", ta: "நோயாளியாக உங்கள் உரிமைகள், அரசு சுகாதார திட்டங்கள் மற்றும் இந்தியாவில் சுகாதாரத்தை நிர்வகிக்கும் சட்ட கட்டமைப்பு குறித்து அறிந்திருங்கள்.", bn: "একজন রোগী হিসেবে আপনার অধিকার, সরকারি স্বাস্থ্য প্রকল্প এবং ভারতে স্বাস্থ্যসেবা নিয়ন্ত্রণকারী আইনি কাঠামো সম্পর্কে অবগত থাকুন।", ml: "ഒരു രോഗി എന്ന നിലയിലുള്ള നിങ്ങളുടെ അവകാശങ്ങൾ, സർക്കാർ ആരോഗ്യ പദ്ധതികൾ, ഇന്ത്യയിലെ ആരോഗ്യ സംരക്ഷണത്തെ നിയന്ത്രിക്കുന്ന നിയമ ചട്ടക്കൂട് എന്നിവയെക്കുറിച്ച് അറിഞ്ഞിരിക്കുക.", kn: "ರೋಗಿಯಾಗಿ ನಿಮ್ಮ ಹಕ್ಕುಗಳು, ಸರ್ಕಾರಿ ಆರೋಗ್ಯ ಯೋಜನೆಗಳು ಮತ್ತು ಭಾರತದಲ್ಲಿ ಆರೋಗ್ಯ ರಕ್ಷಣೆಯನ್ನು ನಿಯಂತ್ರಿಸುವ ಕಾನೂನು ಚೌಕಟ್ಟಿನ ಬಗ್ಗೆ ಮಾಹಿತಿ ಪಡೆಯಿರಿ.", mr: "रुग्ण म्हणून तुमचे हक्क, सरकारी आरोग्य योजना आणि भारतातील आरोग्यसेवेवर नियंत्रण ठेवणाऱ्या कायदेशीर फ्रेमवर्कबद्दल माहिती ठेवा.", gu: "દર્દી તરીકે તમારા અધિકારો, સરકારી આરોગ્ય યોજનાઓ અને ભારતમાં આરોગ્યસંભાળનું સંચાલન કરતા કાયદાકીય માળખા વિશે માહિતગાર રહો.", es: "Manténgase informado sobre sus derechos como paciente, los esquemas de salud del gobierno y el marco legal que rige la atención médica en la India.", fr: "Restez informé de vos droits en tant que patient, des régimes de santé gouvernementaux et du cadre juridique régissant les soins de santé en Inde." },
+    sourceGovt: { en: "Source: Official Govt. Guidelines", hi: "स्रोत: आधिकारिक सरकारी दिशा-निर्देश", te: "మూలం: అధికారిక ప్రభుత్వ మార్గదర్శకాలు", ta: "ஆதாரம்: அதிகாரப்பூர்வ அரசு வழிகாட்டுதல்கள்", bn: "সূত্র: অফিসিয়াল সরকারি নির্দেশিকা", ml: "ഉറവിടം: ഔദ്യോഗിക സർക്കാർ മാർഗ്ഗനിർദ്ദേശങ്ങൾ", kn: "ಮೂಲ: ಅಧಿಕೃತ ಸರ್ಕಾರಿ ಮಾರ್ಗಸೂಚಿಗಳು", mr: "स्रोत: अधिकृत सरकारी मार्गदर्शक तत्त्वे", gu: "સ્ત્રોત: સત્તાવાર સરકારી માર્ગદર્શિકા", es: "Fuente: Pautas oficiales del gobierno", fr: "Source : Directives gouvernementales officielles" },
+    hideDetails: { en: "Hide Details", hi: "विवरण छिपाएं", te: "వివరాలను దాచండి", ta: "விவரங்களை மறை", bn: "বিবরণ আড়াল করুন", ml: "വിശദാംശങ്ങൾ മറയ്ക്കുക", kn: "ವಿವರಗಳನ್ನು मरेमाडी", mr: "तपशील लपवा", gu: "વિગતો છુપાવો", es: "Ocultar detalles", fr: "Masquer les détails" },
+    viewSummary: { en: "View Summary", hi: "सारांश देखें", te: "సారాంశాన్ని వీక్షించండి", ta: "சுருக்கத்தைக் காண்க", bn: "সারাংশ দেখুন", ml: "ചുരുക്കം കാണുക", kn: "ಸಾರಾಂಶವನ್ನು ವೀಕ್ಷಿಸಿ", mr: "सारांश पहा", gu: "સારાંશ જુઓ", es: "Ver resumen", fr: "Voir le résumé" },
+    learnMore: { en: "Learn More", hi: "और जानें", te: "ఇంకా తెలుసుకోండి", ta: "மேலும் அறிக", bn: "আরও জানুন", ml: "കൂടുതൽ അറിയുക", kn: "ಇನ್ನಷ್ಟು ತಿಳಿಯಿರಿ", mr: "अधिक जाणून घ्या", gu: "વધુ જાણો", es: "Más información", fr: "En savoir plus" },
+    legalDisclaimer: { en: "Legal Disclaimer", hi: "कानूनी अस्वीकरण", te: "చట్టపరమైన निराकरण", ta: "சட்ட மறுப்பு", bn: "আইনি দাবিত্যাগ", ml: "നിയമപരമായ നിരാകരണം", kn: "ಕಾನೂನು ಹಕ್ಕು ನಿರಾಕರಣೆ", mr: "कायदेशीर अस्वीकरण", gu: "કાનૂनी અસ્वीકરણ", es: "Aviso legal", fr: "Avis légal" },
+    disclaimerText: { en: "The information provided in this section is for educational purposes and general awareness only. It does not constitute legal advice. Laws and guidelines are subject to change by the respective authorities. For specific legal issues, please consult a qualified legal professional.", hi: "इस अनुभाग में दी गई जानकारी केवल शैक्षिक उद्देश्यों और सामान्य जागरूकता के लिए है। यह कानूनी सलाह नहीं है। कानून और दिशानिर्देश संबंधित अधिकारियों द्वारा परिवर्तन के अधीन हैं। विशिष्ट कानूनी मुद्दों के लिए, कृपया किसी योग्य कानूनी पेशेवर से परामर्श लें।", te: "ఈ విభాగంలో అందించబడిన సమాచారం విద్యా ప్రయోజనాల కోసం మరియు సాధారణ అవగాహన కోసం మాత్రమే. ఇది చట్టపరమైన సలహా కాదు. చట్టాలు మరియు మార్గదర్శకాలు సంబంధిత అధికారులచే మార్చబడవచ్చు. నిర్దిష్ట చట్టపరమైన సమస్యల కోసం, దయచేసి అర్హత కలిగిన న్యాయ నిపుణుడిని సంప్రదించండి.", ta: "இந்த பிரிவில் வழங்கப்பட்டுள்ள தகவல்கள் கல்வி நோக்கங்களுக்காகவும் பொது விழிப்புணர்வுக்காகவும் மட்டுமே. இது சட்ட ஆலோசனையை உருவாக்காது. சட்டங்கள் மற்றும் வழிகாட்டுதல்கள் அந்தந்த அதிகாரிகளால் மாற்றத்திற்கு உட்பட்டவை. குறிப்பிட்ட சட்ட சிக்கல்களுக்கு, தகுதிவாய்ந்த சட்ட நிபுணரை அணுகவும்.", bn: "এই বিভাগে প্রদত্ত তথ্য শুধুমাত্র শিক্ষাগত উদ্দেশ্যে এবং সাধারণ সচেতনতার জন্য। এটি আইনি পরামর্শ গঠন করে না। আইন এবং নির্দেশিকা সংশ্লিষ্ট কর্তৃপক্ষ দ্বারা পরিবর্তন সাপেক্ষে। নির্দিষ্ট আইনি সমস্যার জন্য, অনুগ্রহ করে একজন যোগ্য আইনি পেশাদারের সাথে পরামর্শ করুন।", ml: "ഈ വിഭാഗത്തിൽ നൽകിയിട്ടുള്ള വിവരങ്ങൾ വിദ്യാഭ്യാസ ആവശ്യങ്ങൾക്കും പൊതു അവബോധത്തിനും മാത്രമുള്ളതാണ്. ഇത് നിയമോപദേശമല്ല. നിയമങ്ങളും മാർഗ്ഗനിർദ്ദേശങ്ങളും ബന്ധപ്പെട്ട അധികാരികൾ മാറ്റത്തിന് വിധേയമാണ്. നിർദ്ദിഷ്ട നിയമപരമായ പ്രശ്നങ്ങൾക്ക്, യോഗ്യതയുള്ള ഒരു നിയമ വിദഗ്ദ്ധനെ സമീപിക്കുക.", kn: "ಈ ವಿಭಾಗದಲ್ಲಿ ಒದಗಿಸಲಾದ ಮಾಹಿತಿಯು ಶೈಕ್ಷಣಿಕ ಉದ್ದೇಶಗಳಿಗಾಗಿ ಮತ್ತು ಸಾಮಾನ್ಯ ಜಾಗೃತಿಗಾಗಿ ಮಾತ್ರ. ಇದು ಕಾನೂನು ಸಲಹೆಯಲ್ಲ. ಕಾನೂನುಗಳು ಮತ್ತು ಮಾರ್ಗಸೂಚಿಗಳು ಆಯಾ ಅಧಿಕಾರಿಗಳಿಂದ ಬದಲಾವಣೆಗೆ ಒಳಪಟ್ಟಿರುತ್ತವೆ. ನಿರ್ದಿಷ್ಟ ಕಾನೂನು ಸಮಸ್ಯೆಗಳಿಗೆ, ದಯವಿಟ್ಟು ಅರ್ಹ ಕಾನೂನು ವೃತ್ತಿಪರರನ್ನು ಸಂಪರ್ಕಿಸಿ.", mr: "या विभागात दिलेली माहिती केवळ शैक्षणिक हेतूंसाठी आणि सामान्य जागरूकतेसाठी आहे. हा कायदेशीर सल्ला नाही. कायदे आणि मार्गदर्शक तत्त्वे संबंधित अधिकाऱ्यांद्वारे बदलू शकतात. विशिष्ट कायदेशीर समस्यांसाठी, कृपया पात्र कायदेशीर व्यावसायिकाचा सल्ला घ्या.", gu: "આ વિભાગમાં આપવામાં આવેલી માહિતી માત્ર શૈક્ષણિક હેતુઓ અને સામાન્ય જાગૃતિ માટે છે. તે કાનૂની સલાહ નથી. કાયદા અને માર્ગદર્શિકા સંબંધિત અધિકારીઓ દ્વારા ફેરફારને પાત્ર છે. ચોક્કસ કાનૂनी સમસ્યાઓ માટે, કૃપા કરીને લાયક કાનૂनी વ્યાવસાયિકની સલાહ લો.", es: "La información proporcionada en esta sección es solo para fines educativos y de concienciación general. No constituye asesoramiento legal. Las leyes y pautas están sujetas a cambios por parte de las autoridades respectivas. Para problemas legales específicos, consulte a un profesional legal calificado.", fr: "Les informations fournies dans cette section sont à des fins éducatives et de sensibilisation générale uniquement. Elles ne constituent pas un avis juridique. Les lois et les directives sont sujettes à modification par les autorités respectives. Pour des problèmes juridiques spécifiques, veuillez consulter un professionnel du droit qualifié." },
+    externalLinkMsg: { en: "If the external link above does not open, this summary provides the core legal context.", hi: "यदि ऊपर दिया गया बाहरी लिंक नहीं खुलता है, तो यह सारांश मुख्य कानूनी संदर्भ प्रदान करता है।", te: "పైన ఉన్న బాహ్య లింక్ తెరవకపోते, ఈ సారాంశం కోర్ చట్టపరమైన సందర్భాన్ని అందిస్తుంది.", ta: "மேலே உள்ள வெளிப்புற இணைப்பு திறக்கவில்லை என்றால், இந்த சுருக்கம் முக்கிய சட்ட சூழலை வழங்குகிறது.", bn: "উপরের বাহ্যিক লিঙ্কটি না খুললে, এই সারাংশটি মূল আইনি প্রেক্ষাপট প্রদান করে।", ml: "മുകളിലെ ബാഹ്യ ലിങ്ക് തുറക്കുന്നില്ലെങ്കിൽ, ഈ സംഗ്രഹം പ്രധാന നിയമപരമായ പശ്ചാത്തലം നൽകുന്നു.", kn: "ಮೇಲಿನ ಬಾಹ್ಯ ಲಿಂಕ್ ತೆರೆಯದಿದ್ದರೆ, ಈ ಸಾರಾಂಶವು ಪ್ರಮುಖ ಕಾನೂನು ಸಂದರ್ಭವನ್ನು ಒದಗಿಸುತ್ತದೆ.", mr: "वरील बाह्य दुवा न उघडल्यास, हा सारांश मुख्य कायदेशीर संदर्भ प्रदान करतो.", gu: "જો ઉપરની બાહ્ય લિંક ખુલતી નથી, તો આ સારાંશ મુખ્ય કાનૂની સંદર્ભ પૂરો પાડે છે.", es: "Si el enlace externo anterior no se abre, este resumen proporciona el contexto legal central.", fr: "Si le lien externe ci-dessus ne s'ouvre pas, ce résumé fournit le contexte juridique de base." }
+  };
+  return mapping[key]?.[lang] || mapping[key]?.['en'] || key;
+};
 
-export default function LegalResources() {
+interface LegalProps {
+  language?: Language;
+}
+
+export default function LegalResources({ language = "en" }: LegalProps) {
   const [expandedId, setExpandedId] = React.useState<string | null>(null);
   const lastUpdated = new Date().toLocaleDateString('en-IN', {
     day: 'numeric',
     month: 'long',
     year: 'numeric'
   });
+
+  const getTranslatedSections = () => {
+    const sections = [
+      {
+        id: 'cdsco-banned',
+        title: {
+          en: 'CDSCO Banned Drugs & Safety',
+          hi: 'सीडीएससीओ प्रतिबंधित दवाएं और सुरक्षा',
+          te: 'CDSCO నిషేధిత మందులు & భద్రత',
+          ta: 'CDSCO தடைசெய்யப்பட்ட மருந்துகள் & பாதுகாப்பு',
+          bn: 'CDSCO নিষিদ্ধ ওষুধ ও নিরাপত্তা',
+          ml: 'CDSCO നിരോധിച്ച മരുന്നുകളും സുരക്ഷയും',
+          kn: 'CDSCO ನಿಷೇಧಿತ ಔಷಧಗಳು ಮತ್ತು ಸುರಕ್ಷತೆ',
+          mr: 'CDSCO प्रतिबंधित औषधे आणि सुरक्षा',
+          gu: 'CDSCO પ્રતિબંધित દવાઓ અને સુરક્ષા',
+          es: 'Medicamentos prohibidos por CDSCO y seguridad',
+          fr: 'Médicaments interdits par la CDSCO et sécurité'
+        },
+        icon: <ShieldAlert className="text-rose-600" />,
+        description: {
+          en: 'Critical safety alerts on medications banned or restricted by the CDSCO (India).',
+          hi: 'सीडीएससीओ (भारत) द्वारा प्रतिबंधित या सीमित दवाओं पर महत्वपूर्ण सुरक्षा अलर्ट।',
+          te: 'CDSCO (భారతదేశం) చే నిషేధించబడిన లేదా పరిమితం చేయబడిన మందులపై క్లిష్టమైన భద్రతా హెచ్చరికలు.',
+          ta: 'CDSCO (இந்தியா) தடைசெய்த அல்லது கட்டுப்படுத்திய மருந்துகள் பற்றிய முக்கியமான பாதுகாப்பு எச்சரிக்கைகள்.',
+          bn: 'CDSCO (ভারত) দ্বারা নিষিদ্ধ বা সীমাবদ্ধ ওষুধের বিষয়ে গুরুত্বপূর্ণ নিরাপত্তা সতর্কতা।',
+          ml: 'CDSCO (ഇന്ത്യ) നിരോധിച്ചതോ നിയന്ത്രിച്ചതോ ആയ മരുന്നുകളെക്കുറിച്ചുള്ള സുരക്ഷാ മുന്നറിയിപ്പുകൾ.',
+          kn: 'CDSCO (ಭಾರತ) ನಿಷೇಧಿಸಿದ ಅಥವಾ ನಿರ್ಬಂಧಿಸಿದ ಔಷಧಿಗಳ ಸುರಕ್ಷತಾ ಎಚ್ಚರಿಕೆಗಳು.',
+          mr: 'CDSCO (भारत) द्वारे प्रतिबंधित किंवा मर्यादित औषधांवर महत्त्वपूर्ण सुरक्षा इशारे.',
+          gu: 'CDSCO (ભારત) દ્વારા પ્રતિબંધિત અથવા મર્યાદિત દવાઓ પર મહત્વપૂર્ણ સુરક્ષા ચેતવણીઓ.',
+          es: 'Alertas críticas de seguridad sobre medicamentos prohibidos o restringidos por la CDSCO (India).',
+          fr: 'Alertes de sécurité critiques sur les médicaments interdits ou restreints par la CDSCO (Inde).'
+        },
+        url: 'https://cdsco.gov.in/opencms/opencms/en/Notifications/Banned-Drugs/',
+        content: {
+          en: [
+            'Fixed Dose Combinations (FDCs): Over 300+ FDCs banned due to lack of therapeutic justification.',
+            'Nimesulide: Banned for pediatric use (children under 12) due to liver toxicity risks.',
+            'Analgin: Restricted use due to risk of agranulocytosis (severe white blood cell drop).',
+            'Pioglitazone: Strictly regulated; must not be used as first-line therapy for diabetes.',
+            'Dextropropoxyphene: Banned due to potential for abuse and cardiac risks.',
+            'Safety Check: Always verify the "Schedule" of the drug (H, H1, or X) on the packaging.'
+          ],
+          hi: [
+            'फिक्स्ड डोज कॉम्बिनेशन (FDCs): चिकित्सीय औचित्य की कमी के कारण 300+ से अधिक FDCs प्रतिबंधित हैं।',
+            'निमेसुलाइड: लीवर की विषाक्तता के जोखिम के कारण बाल चिकित्सा (12 वर्ष से कम उम्र के बच्चों) के लिए प्रतिबंधित।',
+            'एनलगिन: एग्रानुलोसाइटोसिस (गंभीर रूप से श्वेत रक्त कोशिकाओं में गिरावट) के जोखिम के कारण सीमित उपयोग।',
+            'पियोग्लिटाजोन: कड़ाई से विनियमित; मधुमेह के लिए पहली पंक्ति की चिकित्सा के रूप में उपयोग नहीं किया जाना चाहिए।',
+            'डेक्सट्रोप्रोपॉक्सीफीन: दुरुपयोग की क्षमता और हृदय संबंधी जोखिमों के कारण प्रतिबंधित।',
+            'सुरक्षा जांच: हमेशा पैकेजिंग पर दवा के "शेड्यूल" (H, H1, या X) की जांच करें।'
+          ],
+          te: [
+            'స్థిర మోతాదు కలయికలు (FDCs): చికిత్సా సమర్థన లేకపోవడం వల్ల 300+ కంటే ఎక్కువ FDCలు నిషేధించబడ్డాయి.',
+            'నిమెసులైడ్: కాలేయ విషపూరిత ప్రమాదాల కారణంగా పిల్లల వాడకం (12 సంవత్సరాల లోపు పిల్లలు) నిషేధించబడింది.',
+            'అనల్గిన్: అగ్రాన్యులోసైటోసిస్ (తీవ్రమైన తెల్ల రక్త కణాల పతనం) ప్రమాదం కారణంగా పరిమిత వాడకం.',
+            'పియోగ్లిటాజోన్: ఖచ్చితంగా నియంత్రించబడుతుంది; మధుమేహం కోసం మొదటి-లైన్ చికిత్సగా ఉపయోగించకూడదు.',
+            'డెక్స్ట్రోప్రోపాక్సిఫేన్: దుర్వినియోగం మరియు గుండె ప్రమాదాల కారణంగా నిషేధించబడింది.',
+            'భద్రతా తనిఖీ: ప్యాకేజింగ్ పై ఎల్లప్పుడూ ఔషధం యొక్క "షెడ్యూల్" (H, H1, లేదా X) ను ధృవీకరించండి.'
+          ],
+          ta: [
+            'நிலையான டோஸ் சேர்க்கைகள் (FDCs): சிகிச்சை நியாயமின்மை காரணமாக 300+ க்கும் மேற்பட்ட FDCகள் தடை செய்யப்பட்டுள்ளன.',
+            'நிமேசுலைடு: கல்லீரல் நச்சுத்தன்மை அபாயங்கள் காரணமாக குழந்தை மருத்துவ பயன்பாட்டிற்கு (12 வயதுக்குட்பட்ட குழந்தைகள்) தடை செய்யப்பட்டுள்ளது.',
+            'அனல்ஜின்: அக்ரானுலோசைடோசிஸ் (தீவிர வெள்ளை இரத்த அணுக்கள் குறைதல்) ஆபத்து காரணமாக கட்டுப்படுத்தப்பட்ட பயன்பாடு.',
+            'பயோகிளிட்டசோன்: கடுமையாக ஒழுங்குபடுத்தப்பட்டது; நீரிழிவு நோய்க்கான முதல் வரிசை சிகிச்சையாக பயன்படுத்தக் கூடாது.',
+            'டெக்ஸ்ட்ரோப்ரோபாக்ஸிபீன்: துஷ்பிரயோகம் மற்றும் இருதய அபாயங்கள் காரணமாக தடை செய்யப்பட்டுள்ளது.',
+            'பாதுகாப்பு சோதனை: பேக்கேஜிங்கில் உள்ள மருந்தின் "அட்டவணை" (H, H1 அல்லது X) ஐ எப்போதும் சரிபார்க்கவும்.'
+          ]
+        },
+        details: {
+          en: 'The Central Drugs Standard Control Organisation (CDSCO) periodically reviews the safety and efficacy of drugs. Fixed Dose Combinations (FDCs) are often banned when they are found to have no therapeutic advantage over individual drugs.',
+          hi: 'केंद्रीय औषधि मानक नियंत्रण संगठन (CDSCO) समय-समय पर दवाओं की सुरक्षा और प्रभावकारिता की समीक्षा करता है। फिक्स्ड डोज कॉम्बिनेशन (FDCs) को अक्सर तब प्रतिबंधित कर दिया जाता है जब उनमें व्यक्तिगत दवाओं की तुलना में कोई चिकित्सीय लाभ नहीं पाया जाता है।',
+          te: 'సెంట్రల్ డ్రగ్స్ స్టాండర్డ్ కంట్రోల్ ఆర్గనైజేషన్ (CDSCO) క్రమానుగతంగా మందుల భద్రత మరియు ప్రభావాన్ని సమీక్షిస్తుంది. వ్యక్తిగత మందుల కంటే చికిత్సా ప్రయోజనం లేనప్పుడు స్థిర మోతాదు కలయికలు (FDCలు) తరచుగా నిషేధించబడతాయి.',
+          ta: 'மத்திய மருந்து தரக் கட்டுப்பாட்டு அமைப்பு (CDSCO) அவ்வப்போது மருந்துகளின் பாதுகாப்பு மற்றும் செயல்திறனை மதிப்பாய்வு செய்கிறது. தனிப்பட்ட மருந்துகளை விட சிகிச்சை நன்மை இல்லை என்று கண்டறியப்பட்டால் நிலையான டோஸ் சேர்க்கைகள் (FDCகள்) பெரும்பாலும் தடை செய்யப்படுகின்றன.'
+        }
+      },
+      {
+        id: 'patient-rights',
+        title: {
+          en: 'Your Rights as a Patient',
+          hi: 'एक रोगी के रूप में आपके अधिकार',
+          te: 'రోగిగా మీ హక్కులు',
+          ta: 'நோயாளியாக உங்கள் உரிமைகள்',
+          bn: 'রোগী হিসেবে আপনার অধিকার',
+          ml: 'രോഗി എന്ന നിലയിലുള്ള നിങ്ങളുടെ അവകാശങ്ങൾ',
+          kn: 'ರೋಗಿಯಾಗಿ ನಿಮ್ಮ ಹಕ್ಕುಗಳು',
+          mr: 'रुग्ण म्हणून तुमचे हक्क',
+          gu: 'દર્દી તરીકે તમારા અધિકારો',
+          es: 'Sus derechos como paciente',
+          fr: 'Vos droits en tant que patient'
+        },
+        icon: <Users className="text-brand-600" />,
+        description: {
+          en: 'Empowering you with the Charter of Patient Rights (NHRC & Ministry of Health).',
+          hi: 'रोगी अधिकारों के चार्टर (NHRC और स्वास्थ्य मंत्रालय) के साथ आपको सशक्त बनाना।',
+          te: 'రోగి హక్కుల చార్టర్ (NHRC & ఆరోగ్య మంత్రిత్వ శాఖ) తో మీకు అధికారం కల్పించడం.',
+          ta: 'நோயாளி உரிமைகள் சாசனம் (NHRC & சுகாதார அமைச்சகம்) மூலம் உங்களுக்கு அதிகாரம் அளித்தல்.',
+          bn: 'রোগী অধিকার সনদের (NHRC এবং স্বাস্থ্য মন্ত্রক) মাধ্যমে আপনাকে ক্ষমতায়ন করা।',
+          ml: 'രോഗി അവകാശ ചാർട്ടർ (NHRC & ആരോഗ്യ മന്ത്രാലയം) വഴി നിങ്ങളെ ശാക്തീകരിക്കുന്നു.',
+          kn: 'ರೋಗಿ ಹಕ್ಕುಗಳ ಸನ್ನದಿನೊಂದಿಗೆ (NHRC ಮತ್ತು ಆರೋಗ್ಯ ಸಚಿವಾಲಯ) ನಿಮ್ಮನ್ನು ಸಬಲೀಕರಣಗೊಳಿಸುವುದು.',
+          mr: 'रुग्ण हक्कांच्या चार्टर (NHRC आणि आरोग्य मंत्रालय) द्वारे तुम्हाला सक्षम करणे.',
+          gu: 'દર્દી અધિકારોના ચાર્ટર (NHRC અને આરોગ્ય મંત્રાલય) સાથે તમને સશક્ત બનાવવા.',
+          es: 'Empoderándolo con la Carta de Derechos del Paciente (NHRC y Ministerio de Salud).',
+          fr: 'Vous responsabiliser grâce à la Charte des droits des patients (NHRC & ministère de la Santé).'
+        },
+        url: 'https://main.mohfw.gov.in/sites/default/files/Charter%20of%20Patient%20Rights.pdf',
+        content: {
+          en: [
+            'Right to Records: You have the legal right to receive your medical reports within 24 hours.',
+            'Right to Consent: No surgery or high-risk treatment can be done without your written permission.',
+            'Right to Choice: You can choose where to buy medicines or get diagnostic tests done.',
+            'Right to Privacy: Your medical condition cannot be discussed with others without your consent.',
+            'Right to Redressal: You can file complaints against hospitals for overcharging or negligence.'
+          ],
+          hi: [
+            'रिकॉर्ड का अधिकार: आपको 24 घंटे के भीतर अपनी मेडिकल रिपोर्ट प्राप्त करने का कानूनी अधिकार है।',
+            'सहमति का अधिकार: आपकी लिखित अनुमति के बिना कोई भी सर्जरी या उच्च जोखिम वाला उपचार नहीं किया जा सकता है।',
+            'विकल्प का अधिकार: आप चुन सकते हैं कि दवाएं कहाँ से खरीदनी हैं या नैदानिक परीक्षण कहाँ से करवाने हैं।',
+            'गोपनीयता का अधिकार: आपकी सहमति के बिना आपकी चिकित्सा स्थिति के बारे में दूसरों के साथ चर्चा नहीं की जा सकती।',
+            'निवारण का अधिकार: आप अत्यधिक शुल्क वसूलने या लापरवाही के लिए अस्पतालों के खिलाफ शिकायत दर्ज कर सकते हैं।'
+          ],
+          te: [
+            'రికార్డుల హక్కు: 24 గంటల్లో మీ వైద్య నివేదికలను పొందే చట్టపరమైన హక్కు మీకు ఉంది.',
+            'సమ్మతి హక్కు: మీ లిఖితపూర్వక అనుమతి లేకుండా ఎటువంటి శస్త్రచికిత్స లేదా అధిక-ప్రమాదకర చికిత్స చేయరాదు.',
+            'ఎంపిక హక్కు: మీరు మందులు ఎక్కడ కొనాలో లేదా రోగనిర్ధారణ పరీక్షలు ఎక్కడ చేయాలో ఎంచుకోవచ్చు.',
+            'గోప్యత హక్కు: మీ సమ్మతి లేకుండా మీ వైద్య పరిస్థితిని ఇతరులతో చర్చించకూడదు.',
+            'పరిష్కార హక్కు: అధిక వసూళ్లు లేదా నిర్లక్ష్యానికి వ్యతిరేకంగా మీరు ఆసుపత్రులపై ఫిర్యాదు చేయవచ్చు.'
+          ],
+          ta: [
+            'பதிவுகளுக்கான உரிமை: 24 மணி நேரத்திற்குள் உங்கள் மருத்துவ அறிக்கைகளைப் பெற உங்களுக்கு சட்டப்பூர்வ உரிமை உள்ளது.',
+            'ஒப்புதல் உரிமை: உங்கள் எழுத்துப்பூர்வ அனுமதி இல்லாமல் எந்த அறுவை சிகிச்சையும் அல்லது அதிக ஆபத்துள்ள சிகிச்சையும் செய்ய முடியாது.',
+            'தேர்வு உரிமை: மருந்துகளை எங்கு வாங்குவது அல்லது கண்டறியும் சோதனைகளை எங்கு செய்வது என்பதை நீங்களே தேர்வு செய்யலாம்.',
+            'தனியுரிமை உரிமை: உங்கள் அனுமதியின்றி உங்கள் மருத்துவ நிலையை மற்றவர்களுடன் விவாதிக்க முடியாது.',
+            'நிவாரண உரிமை: அதிக கட்டணம் அல்லது அலட்சியத்திற்காக மருத்துவமனைகளுக்கு எதிராக நீங்கள் புகார் அளிக்கலாம்.'
+          ]
+        },
+        details: {
+          en: 'The Charter of Patient Rights, adopted by the Ministry of Health and Family Welfare, outlines 17 basic rights. This includes the right to a second opinion, the right to transparency in rates, and the right to non-discrimination based on HIV status, religion, or caste.',
+          hi: 'स्वास्थ्य और परिवार कल्याण मंत्रालय द्वारा अपनाए गए रोगी अधिकारों के चार्टर में 17 बुनियादी अधिकारों की रूपरेखा दी गई है। इसमें दूसरी राय का अधिकार, दरों में पारदर्शिता का अधिकार और गैर-भेदभाव का अधिकार शामिल है।',
+          te: 'ఆరోగ్య మరియు కుటుంబ సంక్షేమ మంత్రిత్వ శాఖ ఆమోదించిన రోగి హక్కుల చార్టర్ 17 ప్రాథమిక హక్కులను వివరిస్తుంది. ఇందులో రెండవ అభిప్రాయ హక్కు, ధరలలో పారదర్శకత హక్కు మరియు వివక్ష రహిత హక్కు ఉన్నాయి.',
+          ta: 'சுகாதாரம் மற்றும் குடும்ப நல அமைச்சகத்தால் ஏற்றுக்கொள்ளப்பட்ட நோயாளி உரிமைகள் சாசனம் 17 அடிப்படை உரிமைகளை கோடிட்டுக் காட்டுகிறது. இதில் இரண்டாவது கருத்துக்கான உரிமை, கட்டணங்களில் வெளிப்படைத்தன்மை மற்றும் பாகுபாடற்ற உரிமை ஆகியவை அடங்கும்.'
+        }
+      },
+      {
+        id: 'mental-health',
+        title: {
+          en: 'Mental Health Rights (2017 Act)',
+          hi: 'मानसिक स्वास्थ्य अधिकार (2017 अधिनियम)',
+          te: 'మానసిక ఆరోగ్య హక్కులు (2017 చట్టం)',
+          ta: 'மனநல உரிமைகள் (2017 சட்டம்)',
+          bn: 'মানসিক স্বাস্থ্য অধিকার (২০১৭ আইন)',
+          ml: 'മാനസികാരോഗ്യ അവകാശങ്ങൾ (2017 ആക്ട്)',
+          kn: 'ಮಾನಸಿಕ ಆರೋಗ್ಯ ಹಕ್ಕುಗಳು (2017 ರ ಕಾಯ್ದೆ)',
+          mr: 'मानसिक आरोग्य हक्क (२०१७ कायदा)',
+          gu: 'માનસિક સ્વાસ્થ્ય અધિકારો (2017 કાયદો)',
+          es: 'Derechos de Salud Mental (Acta 2017)',
+          fr: 'Droits en santé mentale (loi 2017)'
+        },
+        icon: <BookOpen className="text-indigo-600" />,
+        description: {
+          en: 'Protection and support framework for mental well-being.',
+          hi: 'मानसिक कल्याण के लिए सुरक्षा और सहायता ढांचा।',
+          te: 'మానసిక క్షేమం కోసం రక్షణ మరియు సహాయక ఫ్రేమ్‌వర్క్.',
+          ta: 'மன நலத்திற்கான பாதுகாப்பு மற்றும் ஆதரவு கட்டமைப்பு.',
+          bn: 'মানসিক সুস্থতার জন্য সুরক্ষা এবং সহায়তা কাঠামো।',
+          ml: 'മാനസിക ക്ഷേമത്തിനായുള്ള സംരക്ഷണവും പിന്തുണയും നൽകുന്ന ചട്ടക്കൂട്.',
+          kn: 'ಮಾನಸಿಕ ಯೋಗಕ್ಷೇಮಕ್ಕಾಗಿ ರಕ್ಷಣೆ ಮತ್ತು ಬೆಂಬಲ ಚೌಕಟ್ಟು.',
+          mr: 'मानसिक कल्याणासाठी संरक्षण आणि समर्थन फ्रेमवर्क.',
+          gu: 'માનસિક સુખાકારી માટે સુરક્ષા અને સહાયક માળખું.',
+          es: 'Marco de protección y apoyo para el bienestar mental.',
+          fr: 'Cadre de protection et de soutien pour le bien-être mental.'
+        },
+        url: 'https://main.mohfw.gov.in/acts-rules-and-standards-health-sector/acts/mental-healthcare-act-2017',
+        content: {
+          en: [
+            'Right to Equality: Mental illness must be treated on par with physical illness.',
+            'Advance Directive: You can document how you want to be treated if you face a crisis later.',
+            'Nominated Rep: You can legally appoint a friend/relative to handle your medical decisions.',
+            'Suicide Decriminalization: Attempting suicide is no longer a crime; it is a call for help.',
+            'Confidentiality: Mental health records are strictly protected under law.'
+          ],
+          hi: [
+            'समानता का अधिकार: मानसिक बीमारी का इलाज शारीरिक बीमारी के समान ही किया जाना चाहिए।',
+            'अग्रिम निर्देश: यदि आप बाद में संकट का सामना करते हैं तो आप दस्तावेज कर सकते हैं कि आप कैसे इलाज चाहते हैं।',
+            'नामांकित प्रतिनिधि: आप अपने चिकित्सा निर्णयों को संभालने के लिए कानूनी रूप से किसी मित्र/रिश्तेदार को नियुक्त कर सकते हैं।',
+            'आत्महत्या का गैर-अपराधीकरण: आत्महत्या का प्रयास अब अपराध नहीं है; यह मदद की पुकार है।',
+            'गोपनीयता: मानसिक स्वास्थ्य रिकॉर्ड कानून के तहत कड़ाई से सुरक्षित हैं।'
+          ],
+          te: [
+            'సమానత్వ హక్కు: మానసిక అనారోగ్యాన్ని శారీరక అనారోగ్యంతో సమానంగా పరిగణించాలి.',
+            'ముందస్తు ఆదేశం: మీరు భవిష్యత్తులో సంక్షోభాన్ని ఎదుర్కొంటే ఎలా చికిత్స పొందాలో పత్రబద్ధం చేయవచ్చు.',
+            'నామినేటెడ్ ప్రతినిధి: మీ వైద్య నిర్ణయాలను నిర్వహించడానికి మీరు స్నేహితుడు/బంధువును చట్టబద్ధంగా నియమించవచ్చు.',
+            'ఆత్మహత్య నేరరహితం: ఆత్మహత్యాయత్నం ఇకపై నేరం కాదు; అది సహాయం కోసం పిలుపు.',
+            'గోప్యత: మానసిక ఆరోగ్య రికార్డులు చట్టం ప్రకారం ఖచ్చితంగా రక్షించబడతాయి.'
+          ],
+          ta: [
+            'சமத்துவ உரிமை: மனநோயை உடல் நோய்க்கு இணையாக நடத்த வேண்டும்.',
+            'முன்னோடி உத்தரவு: எதிர்காலத்தில் நீங்கள் ஒரு நெருக்கடியை எதிர்கொண்டால், நீங்கள் எவ்வாறு சிகிச்சை பெற விரும்புகிறீர்கள் என்பதை ஆவணப்படுத்தலாம்.',
+            'நியமிக்கப்பட்ட பிரதிநிதி: உங்கள் மருத்துவ முடிவுகளை எடுக்க ஒரு நண்பர்/உறவினரை நீங்கள் சட்டப்பூர்வமாக நியமிக்கலாம்.',
+            'தற்கொலை குற்றமற்றதாக்கல்: தற்கொலைக்கு முயல்வது இனி குற்றமல்ல; அது உதவிக்கான அழைப்பு.',
+            'ரகசியத்தன்மை: மனநல பதிவுகள் சட்டத்தின் கீழ் கடுமையாக பாதுகாக்கப்படுகின்றன.'
+          ]
+        },
+        details: {
+          en: 'The Mental Healthcare Act, 2017, shifted the focus from institutionalization to community-based care. It provides the "Right to Access Mental Healthcare" funded by the government for those below the poverty line.',
+          hi: 'मानसिक स्वास्थ्य देखभाल अधिनियम, 2017 ने संस्थागतकरण से ध्यान हटाकर समुदाय-आधारित देखभाल पर केंद्रित किया। यह गरीबी रेखा से नीचे के लोगों के लिए सरकार द्वारा वित्त पोषित "मानसिक स्वास्थ्य देखभाल तक पहुंच का अधिकार" प्रदान करता है।',
+          te: 'మానసిక ఆరోగ్య సంరక్షణ చట్టం, 2017 సంస్థాగత సంరక్షణ నుండి సమాజ ఆధారిత సంరక్షణకు ప్రాధాన్యతనిచ్చింది. ఇది పేదరికం కంటే తక్కువ ఉన్నవారికి ప్రభుత్వం నిధులు సమకూర్చే "మానసిక ఆరోగ్య సంరక్షణను పొందే హక్కు"ను అందిస్తుంది.',
+          ta: 'மனநல பாதுகாப்பு சட்டம், 2017, நிறுவனமயமாக்கலில் இருந்து சமூகம் சார்ந்த பராமரிப்புக்கு கவனத்தை மாற்றியது. இது வறுமைக் கோட்டிற்கு கீழ் உள்ளவர்களுக்கு அரசாங்கத்தால் நிதியளிக்கப்படும் "மனநலப் பாதுகாப்பைப் பெறுவதற்கான உரிமையை" வழங்குகிறது.'
+        }
+      },
+      {
+        id: 'telemedicine',
+        title: {
+          en: 'Tele-Consultation Rules',
+          hi: 'टेली-परामर्श नियम',
+          te: 'టెలి-కన్సల్టేషన్ నిబంధనలు',
+          ta: 'டெலி-கலந்தாலோசனை விதிகள்',
+          bn: 'টেলি-পরামর্শ নিয়ম',
+          ml: 'ടെലി-കൺസൾട്ടേഷൻ നിയമങ്ങൾ',
+          kn: 'ಟೆಲಿ-ಸಮಾಲೋಚನೆ ನಿಯಮಗಳು',
+          mr: 'टेली-परामर्श नियम',
+          gu: 'ટેલિ-કન્સલ્ટેશન નિયમો',
+          es: 'Reglas de Teleconsulta',
+          fr: 'Règles de téléconsultation'
+        },
+        icon: <PhoneCall className="text-emerald-600" />,
+        description: {
+          en: 'Legal standards for video and phone doctor visits.',
+          hi: 'वीडियो और फोन डॉक्टर विज़िट के लिए कानूनी मानक।',
+          te: 'వీడియో మరియు ఫోన్ ద్వారా వైద్యుల సంప్రదింపుల కోసం చట్టపరమైన ప్రమాణాలు.',
+          ta: 'வீடியோ மற்றும் தொலைபேசி மருத்துவர் வருகைகளுக்கான சட்டத்தரங்கள்.',
+          bn: 'ভিডিও এবং ফোন ডাক্তার পরিদর্শনের জন্য আইনি মানদণ্ড।',
+          ml: 'വീഡിയോ, ഫോൺ ഡോക്ടർ സന്ദർശനങ്ങൾക്കുള്ള നിയമപരമായ മാനദണ്ഡങ്ങൾ.',
+          kn: 'ವಿಡಿಯೋ ಮತ್ತು ಫೋನ್ ವೈದ್ಯರ ಭೇಟಿಗಾಗಿ ಕಾನೂನು ಮಾನದಂಡಗಳು.',
+          mr: 'व्हिडिओ आणि फोन डॉक्टर भेटींसाठी कायदेशीर मानके.',
+          gu: 'વિડિઓ અને ફોન ડૉક્ટરની મુલાકાતો માટેના કાનૂની ધોરણો.',
+          es: 'Estándares legales para visitas médicas por video y teléfono.',
+          fr: 'Normes juridiques pour les consultations médicales par vidéo et téléphone.'
+        },
+        url: 'https://www.nmc.org.in/rules-regulations/telemedicine-practice-guidelines/',
+        content: {
+          en: [
+            'Identity Check: Both the doctor and patient must verify their identity at the start.',
+            'Prescription Format: Digital prescriptions must have the doctor\'s registration number.',
+            'Restricted Drugs: Doctors CANNOT prescribe habit-forming drugs (Schedule X) via video call.',
+            'Consent: Starting a consultation implies consent, but explicit consent is better.',
+            'Data Safety: Platforms must use encrypted channels to protect your health data.'
+          ],
+          hi: [
+            'पहचान की जांच: शुरुआत में डॉक्टर और मरीज दोनों को अपनी पहचान सत्यापित करनी होगी।',
+            'नुस्खा प्रारूप: डिजिटल नुस्खे पर डॉक्टर का पंजीकरण नंबर होना चाहिए।',
+            'प्रतिबंधित दवाएं: डॉक्टर वीडियो कॉल के जरिए आदत बनाने वाली दवाएं (शेड्यूल X) नहीं लिख सकते।',
+            'सहमति: परामर्श शुरू करने का अर्थ सहमति है, लेकिन स्पष्ट सहमति बेहतर है।',
+            'डेटा सुरक्षा: आपके स्वास्थ्य डेटा की सुरक्षा के लिए प्लेटफॉर्म को एन्क्रिप्टेड चैनलों का उपयोग करना चाहिए।'
+          ],
+          te: [
+            'గుర్తింపు తనిఖీ: ప్రారంభంలో వైద్యుడు మరియు రోగి ఇద్దరూ తమ గుర్తింపును ధృవీకరించుకోవాలి.',
+            'ప్రిస్క్రిప్షన్ ఫార్మాట్: డిజిటల్ ప్రిస్క్రిప్షన్లలో వైద్యుడి రిజిస్ట్రేషన్ సంఖ్య ఉండాలి.',
+            'పరిమితం చేయబడిన మందులు: వైద్యులు వీడియో కాల్ ద్వారా అలవాటుగా మారే మందులను (షెడ్యూల్ X) సూచించలేరు.',
+            'సమ్మతి: సంప్రదింపులను ప్రారంభించడం అంటే సమ్మతి అని అర్థం, కానీ స్పష్టమైన సమ్మతి ఉత్తమం.',
+            'డేటా భద్రత: మీ ఆరోగ్య డేటాను రక్షించడానికి ప్లాట్‌ఫారమ్‌లు ఎన్‌క్రిప్టెడ్ ఛానెల్‌లను ఉపయోగించాలి.'
+          ],
+          ta: [
+            'அடையாள சோதனை: தொடக்கத்தில் மருத்துவர் மற்றும் நோயாளி இருவரும் தங்கள் அடையாளத்தை சரிபார்க்க வேண்டும்.',
+            'மருந்துச் சீட்டு வடிவம்: டிஜிட்டல் மருந்துச் சீட்டுகளில் மருத்துவரின் பதிவு எண் இருக்க வேண்டும்.',
+            'கட்டுப்படுத்தப்பட்ட மருந்துகள்: மருத்துவர்கள் வீடியோ அழைப்பு மூலம் பழக்கத்தை ஏற்படுத்தும் மருந்துகளை (அட்டவணை X) பரிந்துரைக்க முடியாது.',
+            'ஒப்புதல்: ஆலோசனையைத் தொடங்குவது ஒப்புதலைக் குறிக்கிறது, ஆனால் வெளிப்படையான ஒப்புதல் சிறந்தது.',
+            'தரவு பாதுகாப்பு: உங்கள் சுகாதார தரவைப் பாதுகாக்க தளங்கள் மறைகுறியாக்கப்பட்ட சேனல்களைப் பயன்படுத்த வேண்டும்.'
+          ]
+        },
+        details: {
+          en: 'Telemedicine guidelines issued by the National Medical Commission (NMC) allow doctors to provide consultations via video, audio, or text. However, doctors are prohibited from prescribing "List O" drugs (habit-forming, narcotics) through tele-consultation.',
+          hi: 'राष्ट्रीय चिकित्सा आयोग (NMC) द्वारा जारी टेलीमेडिसिन दिशानिर्देश डॉक्टरों को वीडियो, ऑडियो या टेक्स्ट के माध्यम से परामर्श प्रदान करने की अनुमति देते हैं। हालांकि, डॉक्टरों को टेली-परामर्श के माध्यम से आदत बनाने वाली दवाएं लिखने की मनाही है।',
+          te: 'నేషనల్ మెడికల్ కమిషన్ (NMC) జారీ చేసిన టెలిమెడిసిన్ మార్గదర్శకాలు వైద్యులు వీడియో, ఆడియో లేదా టెక్స్ట్ ద్వారా సంప్రదింపులను అందించడానికి అనుమతిస్తాయి. అయితే, టెలి-సంప్రదింపుల ద్వారా అలవాటుగా మారే మందులను సూచించడం నిషేధించబడింది.',
+          ta: 'தேசிய மருத்துவ ஆணையம் (NMC) வழங்கிய டெலிமெடிசின் வழிகாட்டுதல்கள் மருத்துவர்கள் வீடியோ, ஆடியோ அல்லது உரை மூலம் ஆலோசனைகளை வழங்க அனுமதிக்கின்றன. இருப்பினும், டெலி-ஆலோசனை மூலம் பழக்கத்தை ஏற்படுத்தும் மருந்துகளை பரிந்துரைக்க தடை விதிக்கப்பட்டுள்ளது.'
+        }
+      },
+      {
+        id: 'negligence',
+        title: {
+          en: 'Medical Malpractice & Redressal',
+          hi: 'चिकित्सा कदाचार और निवारण',
+          te: 'వైద్య దుర్విధానం & నివారణ',
+          ta: 'மருத்துவ முறைகேடு & நிவாரணம்',
+          bn: 'চিকিৎসা অসদাচরণ ও প্রতিকার',
+          ml: 'മെഡിക്കൽ കൃത്രിമത്വവും പരിഹാരവും',
+          kn: 'ವೈದ್ಯಕೀಯ ದುಷ್ಕೃತ್ಯ ಮತ್ತು ಪರಿಹಾರ',
+          mr: 'वैद्यकीय गैरव्यवहार आणि निवारण',
+          gu: 'તબીબી ગેરરીતિ અને નિવારણ',
+          es: 'Negligencia médica y reparación',
+          fr: 'Faute médicale et réparation'
+        },
+        icon: <Gavel className="text-slate-600" />,
+        description: {
+          en: 'How to seek justice in cases of medical errors or negligence.',
+          hi: 'चिकित्सीय त्रुटियों या लापरवाही के मामलों में न्याय कैसे प्राप्त करें।',
+          te: 'వైద్యపరమైన తప్పులు లేదా నిర్లక్ష్యం జరిగినప్పుడు న్యాయం ఎలా పొందాలో తెలుసుకోండి.',
+          ta: 'மருத்துவ பிழைகள் அல்லது அலட்சியம் வழக்குகளில் நீதி பெறுவது எப்படி.',
+          bn: 'চিকিৎসাগত ত্রুটি বা অবহেলার ক্ষেত্রে কীভাবে বিচার পাবেন।',
+          ml: 'മെഡിക്കൽ പിഴവുകളോ വീഴ്ചകളോ ഉണ്ടായാൽ എങ്ങനെ നീതി തേടാം.',
+          kn: 'ವೈದ್ಯಕೀಯ ದೋಷಗಳು ಅಥವಾ ನಿರ್ಲಕ್ಷ್ಯದ ಸಂದರ್ಭಗಳಲ್ಲಿ ನ್ಯಾಯವನ್ನು ಪಡೆಯುವುದು ಹೇಗೆ.',
+          mr: 'वैद्यकीय त्रुटी किंवा निष्काळजीपणाच्या प्रकरणांमध्ये न्याय कसा मिळवायचा.',
+          gu: 'તબીબી ભૂલો અથવા બેદરકારીના કિસ્સામાં ન્યાય કેવી રીતે મેળવવો.',
+          es: 'Cómo buscar justicia en casos de errores médicos o negligencia.',
+          fr: 'Comment obtenir justice en cas d\'erreurs médicales ou de négligence.'
+        },
+        url: 'https://ncdrc.nic.in/',
+        content: {
+          en: [
+            'Consumer Protection: You are a "consumer" of health services and can sue for poor service.',
+            'State Medical Council: You can report doctors for unethical behavior or misconduct.',
+            'Compensation: Consumer courts can award financial damages for proven negligence.',
+            'Legal Aid: Free legal services are available for those who cannot afford a lawyer.',
+            'Mediation: Many disputes can be settled faster through neutral mediation boards.'
+          ],
+          hi: [
+            'उपभोक्ता संरक्षण: आप स्वास्थ्य सेवाओं के "उपभोक्ता" हैं और खराब सेवा के लिए मुकदमा कर सकते हैं।',
+            'राज्य चिकित्सा परिषद: आप अनैतिक व्यवहार या कदाचार के लिए डॉक्टरों की रिपोर्ट कर सकते हैं।',
+            'मुआवजा: उपभोक्ता अदालतें प्रमाणित लापरवाही के लिए वित्तीय हर्जाना दे सकती हैं।',
+            'कानूनी सहायता: जो लोग वकील का खर्च नहीं उठा सकते उनके लिए मुफ्त कानूनी सेवाएं उपलब्ध हैं।',
+            'मध्यस्थता: कई विवादों को निष्पक्ष मध्यस्थता बोर्डों के माध्यम से तेजी से सुलझाया जा सकता है।'
+          ],
+          te: [
+            'వినియోగదారుల రక్షణ: మీరు ఆరోగ్య సేవల "వినియోగదారుడు" మరియు పేద సేవ కోసం దావా వేయవచ్చు.',
+            'రాష్ట్ర వైద్య మండలి: మీరు అనాలోచిత ప్రవర్తన లేదా దుష్ప్రవర్తన కోసం వైద్యులపై నివేదించవచ్చు.',
+            'నష్టపరిహారం: నిరూపితమైన నిర్లక్ష్యానికి వినియోగదారుల కోర్టులు ఆర్థిక నష్టపరిహారాన్ని మంజూరు చేయవచ్చు.',
+            'చట్టపరమైన సహాయం: న్యాయవాదిని భరించలేని వారికి ఉచిత చట్టపరమైన సేవలు అందుబాటులో ఉన్నాయి.',
+            'మధ్యవర్తిత్వం: అనేక వివాదాలను తటస్థ మధ్యవర్తిత్వ బోర్డుల ద్వారా వేగంగా పరిష్కరించుకోవచ్చు.'
+          ],
+          ta: [
+            'நுகர்வோர் பாதுகாப்பு: நீங்கள் சுகாதார சேவைகளின் "நுகர்வோர்" மற்றும் மோசமான சேவைக்காக வழக்கு தொடரலாம்.',
+            'மாநில மருத்துவ கவுன்சில்: நெறிமுறையற்ற நடத்தை அல்லது தவறான நடத்தைகளுக்காக மருத்துவர்கள் மீது நீங்கள் புகார் செய்யலாம்.',
+            'இழப்பீடு: நிரூபிக்கப்பட்ட அலட்சியத்திற்கு நுகர்வோர் நீதிமன்றங்கள் நிதி இழப்பீடு வழங்க முடியும்.',
+            'சட்ட உதவி: வழக்கறிஞரை நியமிக்க முடியாதவர்களுக்கு இலவச சட்ட சேவைகள் கிடைக்கின்றன.',
+            'மத்தியஸ்தம்: பல சர்ச்சைகளை நடுநிலை மத்தியஸ்த வாரியங்கள் மூலம் விரைவாக தீர்க்க முடியும்.'
+          ]
+        },
+        details: {
+          en: 'Medical negligence occurs when a healthcare professional fails to provide the standard of care expected, resulting in harm. Patients can approach Consumer Commissions depending on the claim amount.',
+          hi: 'चिकित्सा लापरवाही तब होती है जब एक स्वास्थ्य देखभाल पेशेवर अपेक्षित देखभाल के मानक प्रदान करने में विफल रहता है, जिससे नुकसान होता है। मरीज दावा राशि के आधार पर उपभोक्ता आयोगों से संपर्क कर सकते हैं।',
+          te: 'వైద్య నిర్లక్ష్యం అనేది ఆరోగ్య సంరక్షణ నిపుణుడు ఆశించిన సంరక్షణ ప్రమాణాలను అందించడంలో విఫలమై, హాని కలిగించినప్పుడు సంభవిస్తుంది. రోగులు క్లెయిమ్ మొత్తాన్ని బట్టి వినియోగదారుల కమిషన్లను సంప్రదించవచ్చు.',
+          ta: 'மருத்துவ அலட்சியம் என்பது ஒரு சுகாதார நிபுணர் எதிர்பார்க்கப்படும் பராமரிப்பு தரத்தை வழங்கத் தவறி, அதனால் தீங்கு விளைவிக்கும் போது ஏற்படுகிறது. கோரிக்கை தொகையைப் பொறுத்து நோயாளிகள் நுகர்வோர் ஆணையங்களை அணுகலாம்.'
+        }
+      },
+      {
+        id: 'schemes',
+        title: {
+          en: 'Financial Aid & Govt. Schemes',
+          hi: 'वित्तीय सहायता और सरकारी योजनाएं',
+          te: 'ఆర్థిక సహాయం & ప్రభుత్వ పథకాలు',
+          ta: 'நிதி உதவி & அரசு திட்டங்கள்',
+          bn: 'আর্থিক সহায়তা ও সরকারি প্রকল্প',
+          ml: 'സാമ്പത്തിക സഹായവും സർക്കാർ പദ്ധതികളും',
+          kn: 'ಆರ್ಥಿಕ ನೆರವು ಮತ್ತು ಸರ್ಕಾರಿ ಯೋಜನೆಗಳು',
+          mr: 'आर्थिक मदत आणि सरकारी योजना',
+          gu: 'નાણાકીય સહાય અને સરકારી યોજનાઓ',
+          es: 'Ayuda financiera y esquemas gubernamentales',
+          fr: 'Aide financière et programmes gouvernementaux'
+        },
+        icon: <ShieldCheck className="text-amber-600" />,
+        description: {
+          en: 'Accessing affordable healthcare through national initiatives.',
+          hi: 'राष्ट्रीय पहलों के माध्यम से सस्ती स्वास्थ्य सेवा प्राप्त करना।',
+          te: 'జాతీయ కార్యక్రమాల ద్వారా సరసమైన ఆరోగ్య సంరక్షణను పొందడం.',
+          ta: 'தேசிய முன்முயற்சிகள் மூலம் மலிவு விலையில் சுகாதார சேவைகளைப் பெறுதல்.',
+          bn: 'জাতীয় উদ্যোগের মাধ্যমে সাশ্রয়ী মূল্যের স্বাস্থ্যসেবা অ্যাক্সেস করা।',
+          ml: 'ദേശീയ സംരംഭങ്ങളിലൂടെ താങ്ങാനാവുന്ന ആരോഗ്യ സംരക്ഷണം ലഭ്യമാക്കുക.',
+          kn: 'ರಾಷ್ಟ್ರೀಯ ಉಪಕ್ರಮಗಳ ಮೂಲಕ ಕೈಗೆಟುಕುವ ವೈದ್ಯಕೀಯ ರಕ್ಷಣೆಯನ್ನು ಪಡೆಯುವುದು.',
+          mr: 'राष्ट्रीय उपक्रमांद्वारे परवडणारी आरोग्यसेवा मिळवणे.',
+          gu: 'રાષ્ટ્રીય પહેલ દ્વારા સસ્તું આરોગ્યસંભાળ મેળવવી.',
+          es: 'Acceso a atención médica asequible a través de iniciativas nacionales.',
+          fr: 'Accéder à des soins de santé abordables grâce à des initiatives nationales.'
+        },
+        url: 'https://nha.gov.in/PM-JAY',
+        content: {
+          en: [
+            'PM-JAY (Ayushman Bharat): Provides ₹5 Lakh/year for secondary & tertiary hospital care.',
+            'Janaushadhi: Access to high-quality generic medicines at 50-90% lower costs.',
+            'Health ID (ABHA): A digital health record to store all your prescriptions and reports.',
+            'Maternal Benefits: Financial support for institutional deliveries (JSY scheme).',
+            'Free Diagnostics: Available at many government primary health centers.'
+          ],
+          hi: [
+            'PM-JAY (आयुष्मान भारत): माध्यमिक और तृतीयक अस्पताल देखभाल के लिए ₹5 लाख/वर्ष प्रदान करता है।',
+            'जनऔषधि: 50-90% कम लागत पर उच्च गुणवत्ता वाली जेनेरिक दवाओं तक पहुंच।',
+            'स्वास्थ्य आईडी (ABHA): आपके सभी नुस्खों और रिपोर्टों को संग्रहीत करने के लिए एक डिजिटल स्वास्थ्य रिकॉर्ड।',
+            'मातृत्व लाभ: संस्थागत प्रसव के लिए वित्तीय सहायता (JSY योजना)।',
+            'मुफ्त निदान: कई सरकारी प्राथमिक स्वास्थ्य केंद्रों पर उपलब्ध है।'
+          ],
+          te: [
+            'PM-JAY (ఆయుష్మాన్ భారత్): ద్వితీయ & తృతీయ ఆసుపత్రి సంరక్షణ కోసం సంవత్సరానికి ₹5 లక్షలు అందిస్తుంది.',
+            'జనౌషధి: 50-90% తక్కువ ధరలలో అధిక-నాణ్యత కలిగిన జెనరిక్ మందులను పొందడం.',
+            'హెల్త్ ఐడీ (ABHA): మీ ప్రిస్క్రిప్షన్లు మరియు నివేదికలను నిల్వ చేయడానికి డిజిటల్ ఆరోగ్య రికార్డు.',
+            'మాతృత్వ ప్రయోజనాలు: ఆసుపత్రి ప్రసవాల కోసం ఆర్థిక సహాయం (JSY పథకం).',
+            'ఉచిత రోగనిర్ధారణ: అనేక ప్రభుత్వ ప్రాథమిక ఆరోగ్య కేంద్రాలలో అందుబాటులో ఉంది.'
+          ],
+          ta: [
+            'PM-JAY (ஆயுஷ்மான் பாரத்): இரண்டாம் நிலை மற்றும் மூன்றாம் நிலை மருத்துவமனை பராமரிப்புக்காக ஆண்டுக்கு ₹5 லட்சம் வழங்குகிறது.',
+            'ஜனௌஷதி: 50-90% குறைந்த செலவில் உயர்தர பொதுவான மருந்துகளைப் பெறுதல்.',
+            'ஹெல்த் ஐடி (ABHA): உங்கள் மருந்துச் சீட்டுகள் மற்றும் அறிக்கைகளைச் சேமிப்பதற்கான டிஜிட்டల్ சுகாதாரப் பதிவு.',
+            'மகப்பேறு நன்மைகள்: மருத்துவமனை பிரசவங்களுக்கான நிதி உதவி (JSY திட்டம்).',
+            'இலவச கண்டறிதல்: பல அரசு ஆரம்ப சுகாதார நிலையங்களில் கிடைக்கிறது.'
+          ]
+        },
+        details: {
+          en: 'Ayushman Bharat (PM-JAY) is the world\'s largest health insurance scheme, covering over 50 crore citizens. For those not covered, Janaushadhi Kendras provide generic versions of expensive branded drugs.',
+          hi: 'आयुष्मान भारत (PM-JAY) दुनिया की सबसे बड़ी स्वास्थ्य बीमा योजना है, जो 50 करोड़ से अधिक नागरिकों को कवर करती है। जो लोग कवर नहीं हैं, उनके लिए जनऔषधि केंद्र जेनेरिक दवाएं प्रदान करते हैं।',
+          te: 'ఆయుష్మాన్ భారత్ (PM-JAY) ప్రపంచంలోనే అతిపెద్ద ఆరోగ్య బీమా పథకం, ఇది 50 కోట్లకు పైగా పౌరులను కవర్ చేస్తుంది. కవర్ కాని వారి కోసం జనౌషధి కేంద్రాలు జెనరిక్ మందులను అందిస్తాయి.',
+          ta: 'ஆயுஷ்மான் பாரத் (PM-JAY) உலகின் மிகப்பெரிய சுகாதார காப்பீட்டுத் திட்டமாகும், இது 50 கோடிக்கும் அதிகமான குடிமக்களை உள்ளடக்கியது. காப்பீடு இல்லாதவர்களுக்கு ஜனௌஷதி மையங்கள் பொதுவான மருந்துகளை வழங்குகின்றன.'
+        }
+      }
+    ];
+
+    return sections.map(section => ({
+      id: section.id,
+      title: section.title[language] || section.title['en'] || '',
+      icon: section.icon,
+      description: section.description[language] || section.description['en'] || '',
+      url: section.url,
+      content: (section.content as any)[language] || (section.content as any)['en'] || [],
+      details: (section.details as any)[language] || (section.details as any)['en'] || ''
+    }));
+  };
+
+  const sections = getTranslatedSections();
 
   return (
     <div className="flex flex-col h-full space-y-8 overflow-y-auto pb-12 pr-2 custom-scrollbar">
@@ -130,24 +482,24 @@ export default function LegalResources() {
           <div className="flex items-center gap-4">
             <div className="inline-flex items-center gap-2 px-4 py-2 bg-indigo-500/10 border border-indigo-500/20 rounded-full text-indigo-400 text-xs font-bold uppercase tracking-widest">
               <Scale size={14} />
-              Legal & Compliance Framework
+              {getLegalTranslation("headerFramework", language)}
             </div>
             <div className="text-[10px] text-slate-500 font-bold uppercase tracking-widest">
-              Last Verified: {lastUpdated}
+              {getLegalTranslation("lastVerified", language)} {lastUpdated}
             </div>
           </div>
           <h2 className="font-display font-bold text-4xl text-white tracking-tight leading-tight">
-            Medical Rights & <span className="text-indigo-400">Legal Resources</span>
+            {getLegalTranslation("medicalRights", language)} <span className="text-indigo-400">{getLegalTranslation("legalResources", language)}</span>
           </h2>
           <p className="text-slate-400 text-lg leading-relaxed">
-            Stay informed about your rights as a patient, government health schemes, and the legal framework governing healthcare in India.
+            {getLegalTranslation("stayInformed", language)}
           </p>
         </div>
       </motion.div>
 
       {/* Grid of Sections */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {LEGAL_SECTIONS.map((section, index) => (
+        {sections.map((section, index) => (
           <motion.div
             key={section.id}
             initial={{ opacity: 0, y: 20 }}
@@ -188,12 +540,12 @@ export default function LegalResources() {
 
             <div className="mt-8 pt-6 border-t border-slate-50 flex items-center justify-between">
               <div className="flex flex-col gap-1">
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">Source: Official Govt. Guidelines</span>
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-widest">{getLegalTranslation("sourceGovt", language)}</span>
                 <button 
                   onClick={() => setExpandedId(expandedId === section.id ? null : section.id)}
                   className="text-[10px] text-indigo-500 font-bold uppercase tracking-widest hover:underline text-left"
                 >
-                  {expandedId === section.id ? 'Hide Details' : 'View Summary'}
+                  {expandedId === section.id ? getLegalTranslation('hideDetails', language) : getLegalTranslation('viewSummary', language)}
                 </button>
               </div>
               <motion.button 
@@ -202,7 +554,7 @@ export default function LegalResources() {
                 onClick={() => window.open(section.url, '_blank')}
                 className="text-indigo-600 text-xs font-bold flex items-center gap-1 transition-all"
               >
-                Learn More <ExternalLink size={14} />
+                {getLegalTranslation("learnMore", language)} <ExternalLink size={14} />
               </motion.button>
             </div>
 
@@ -220,7 +572,7 @@ export default function LegalResources() {
                     </p>
                     <div className="mt-3 pt-3 border-t border-slate-200 flex items-center gap-2 text-[9px] text-slate-400 font-medium">
                       <Info size={10} />
-                      If the external link above does not open, this summary provides the core legal context.
+                      {getLegalTranslation("externalLinkMsg", language)}
                     </div>
                   </div>
                 </motion.div>
@@ -251,9 +603,9 @@ export default function LegalResources() {
           <Info size={24} />
         </motion.div>
         <div className="space-y-2">
-          <h4 className="font-bold text-indigo-900">Legal Disclaimer</h4>
+          <h4 className="font-bold text-indigo-900">{getLegalTranslation("legalDisclaimer", language)}</h4>
           <p className="text-sm text-indigo-700 leading-relaxed">
-            The information provided in this section is for educational purposes and general awareness only. It does not constitute legal advice. Laws and guidelines are subject to change by the respective authorities. For specific legal issues, please consult a qualified legal professional.
+            {getLegalTranslation("disclaimerText", language)}
           </p>
         </div>
       </motion.div>
