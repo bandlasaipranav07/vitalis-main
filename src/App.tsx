@@ -266,7 +266,7 @@ function AppContent() {
       case 'emergency':
         return <EmergencyGuides language={selectedLanguage} />;
       case 'general-health':
-        return <GeneralHealth />;
+        return <GeneralHealth language={selectedLanguage} />;
       case 'legal-resources':
         return <LegalResources language={selectedLanguage} />;
       case 'trust-privacy':

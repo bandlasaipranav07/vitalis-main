@@ -395,17 +395,18 @@ export class LocalClinicalEngine {
 
     // 4. Dynamic Symptom Analyzer for Chat queries
     const detectedKeys: string[] = [];
-    if (text.includes("fever") || text.includes("temperature") || text.includes("chills") || text.includes("bukhar") || text.includes("jwar")) detectedKeys.push("general");
-    if (text.includes("cough") || text.includes("throat") || text.includes("cold") || text.includes("runny nose") || text.includes("khansi") || text.includes("dagg")) detectedKeys.push("respiratory");
-    if (text.includes("stomach") || text.includes("belly") || text.includes("acid") || text.includes("reflux") || text.includes("pet dard")) detectedKeys.push("digestive");
-    if (text.includes("vomit") || text.includes("nausea") || text.includes("diarrhea") || text.includes("loose motion")) detectedKeys.push("gastrointestinal");
-    if (text.includes("headache") || text.includes("dizzy") || text.includes("migraine") || text.includes("sir dard") || text.includes("tala nopp")) detectedKeys.push("neurological");
-    if (text.includes("muscle") || text.includes("joint") || text.includes("back pain") || text.includes("body ache") || text.includes("body pain") || text.includes("badan dard")) detectedKeys.push("musculoskeletal");
-    if (text.includes("rash") || text.includes("skin") || text.includes("itch") || text.includes("eye pain") || text.includes("conjunctiv")) detectedKeys.push("skin_eyes");
+    if (text.includes("fever") || text.includes("temperature") || text.includes("chills") || text.includes("bukhar") || text.includes("jwar") || text.includes("hot")) detectedKeys.push("general");
+    if (text.includes("cough") || text.includes("throat") || text.includes("cold") || text.includes("runny nose") || text.includes("khansi") || text.includes("dagg") || text.includes("sneez") || text.includes("congestion") || text.includes("wheez")) detectedKeys.push("respiratory");
+    if (text.includes("stomach") || text.includes("belly") || text.includes("acid") || text.includes("reflux") || text.includes("pet dard") || text.includes("constip") || text.includes("bloat") || text.includes("heartburn") || text.includes("indigest") || text.includes("gas") || text.includes("abdomen") || text.includes("abdominal") || text.includes("bowel") || text.includes("ibs")) detectedKeys.push("digestive");
+    if (text.includes("vomit") || text.includes("nausea") || text.includes("diarrhea") || text.includes("diarrhoea") || text.includes("loose motion") || text.includes("food poison") || text.includes("upset stomach")) detectedKeys.push("gastrointestinal");
+    if (text.includes("headache") || text.includes("dizzy") || text.includes("migraine") || text.includes("sir dard") || text.includes("tala nopp") || text.includes("vertigo") || text.includes("head pain") || text.includes("lightheaded")) detectedKeys.push("neurological");
+    if (text.includes("muscle") || text.includes("joint") || text.includes("back pain") || text.includes("body ache") || text.includes("body pain") || text.includes("badan dard") || text.includes("knee") || text.includes("shoulder") || text.includes("neck pain") || text.includes("cramp") || text.includes("sprain")) detectedKeys.push("musculoskeletal");
+    if (text.includes("rash") || text.includes("skin") || text.includes("itch") || text.includes("eye pain") || text.includes("conjunctiv") || text.includes("hives") || text.includes("allerg") || text.includes("red eye")) detectedKeys.push("skin_eyes");
+    if (text.includes("tired") || text.includes("fatigue") || text.includes("weak") || text.includes("insomn") || text.includes("sleep") || text.includes("exhaust") || text.includes("energy")) detectedKeys.push("general");
 
     if (detectedKeys.length > 0) {
       // Construct a highly dynamic customized chat response based on the matched categories!
-      let response = disclaimer;
+      let response = "";
       const primaryKey = detectedKeys[0];
       const dataObj = lMap[primaryKey];
 
@@ -458,8 +459,8 @@ export class LocalClinicalEngine {
       return response;
     }
 
-    // 5. Default/Greetings
-    return disclaimer + lMap.meta.greeting;
+    // 5. Default/Greetings — only show greeting (disclaimer already shown once by the frontend)
+    return lMap.meta.greeting;
   }
 
   /**
